@@ -252,3 +252,15 @@ Update KDS status body:
   "kds_status": "preparing"
 }
 ```
+
+## Reports
+
+All report routes require an admin JWT. Date filters use `YYYY-MM-DD`.
+
+```http
+GET /api/reports/summary?startDate=2026-01-01&endDate=2026-12-31
+GET /api/reports/sales-trend?startDate=2026-01-01&endDate=2026-12-31
+GET /api/reports/top-products?startDate=2026-01-01&endDate=2026-12-31
+GET /api/reports/top-categories?startDate=2026-01-01&endDate=2026-12-31
+GET /api/reports/export?format=csv&startDate=2026-01-01&endDate=2026-12-31
+```
