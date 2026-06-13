@@ -1,5 +1,5 @@
 /* eslint-disable react-refresh/only-export-components */
-import { createContext, useState, useContext } from 'react';
+import { createContext, useState, useEffect, useContext, useCallback } from 'react';
 import api from '../services/api';
 
 const AuthContext = createContext(null);
@@ -23,8 +23,42 @@ export const AuthProvider = ({ children }) => {
   const [currentUser, setCurrentUser] = useState(initialState.user);
   const [token, setToken] = useState(initialState.token);
   const [role, setRole] = useState(initialState.role);
-  // loading is false initially because we got state synchronously from localStorage
-  const [loading] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  const isAuthenticated = !!token && !!currentUser;
+
+  const refreshUser = useCallback(async () => {
+    if (!token) {
+      setLoading(false);
+      return null;
+    }
+    try {
+      const response = await api.get('/auth/me');
+      const user = response.data.user;
+      setCurrentUser(user);
+      setRole(user.role);
+      localStorage.setItem('user', JSON.stringify(user));
+      return user;
+    } catch (error) {
+      console.error('Failed to refresh user', error);
+      // If 401, the interceptor will handle the logout
+      if (error.response?.status !== 401) {
+        setToken(null);
+        setCurrentUser(null);
+        setRole(null);
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+      }
+      return null;
+    } finally {
+      setLoading(false);
+    }
+  }, [token]);
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    refreshUser();
+  }, [refreshUser]);
 
   const login = async (credentials) => {
     const response = await api.post('/auth/login', credentials);
@@ -40,6 +74,11 @@ export const AuthProvider = ({ children }) => {
     return user;
   };
 
+  const register = async (userData) => {
+    const response = await api.post('/auth/register', userData);
+    return response.data;
+  };
+
   const logout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
@@ -49,8 +88,21 @@ export const AuthProvider = ({ children }) => {
     window.location.href = '/login';
   };
 
+  const getCurrentUser = () => currentUser;
+
   return (
-    <AuthContext.Provider value={{ currentUser, role, token, login, logout, loading }}>
+    <AuthContext.Provider value={{ 
+      currentUser, 
+      role, 
+      token, 
+      loading, 
+      isAuthenticated,
+      login, 
+      register,
+      logout, 
+      getCurrentUser,
+      refreshUser
+    }}>
       {!loading && children}
     </AuthContext.Provider>
   );

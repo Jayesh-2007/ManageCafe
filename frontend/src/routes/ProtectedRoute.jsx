@@ -1,15 +1,23 @@
-import { Navigate, Outlet } from 'react-router-dom';
+import { Navigate, Outlet, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 
-export default function ProtectedRoute({ requiredRole }) {
-  const { currentUser, role, token } = useAuth();
+export default function ProtectedRoute({ requiredRole, guestOnly }) {
+  const { isAuthenticated, role } = useAuth();
+  const location = useLocation();
 
-  if (!token || !currentUser) {
-    return <Navigate to="/login" replace />;
+  if (guestOnly) {
+    if (isAuthenticated) {
+      return <Navigate to={role === 'admin' ? '/reports' : '/pos'} replace />;
+    }
+    return <Outlet />;
+  }
+
+  if (!isAuthenticated) {
+    return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
   if (requiredRole && role !== requiredRole) {
-    return <Navigate to="/" replace />;
+    return <Navigate to="/pos" replace />;
   }
 
   return <Outlet />;
