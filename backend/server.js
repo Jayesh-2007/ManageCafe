@@ -8,6 +8,7 @@ const customerRoutes = require('./routes/customerRoutes');
 const kdsRoutes = require('./routes/kdsRoutes');
 const orderRoutes = require('./routes/orderRoutes');
 const productRoutes = require('./routes/productRoutes');
+const promotionRoutes = require('./routes/promotionRoutes');
 const reportRoutes = require('./routes/reportRoutes');
 
 const app = express();
@@ -21,6 +22,7 @@ app.use('/api/customers', customerRoutes);
 app.use('/api/kds', kdsRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/products', productRoutes);
+app.use('/api/promotions', promotionRoutes);
 app.use('/api/reports', reportRoutes);
 
 app.get('/api/health', (req, res) => {

@@ -1,4 +1,5 @@
 const db = require('../models/db');
+const { calculateOrderDiscounts } = require('../utils/discountEngine');
 
 function getPagination(query) {
   const page = Math.max(Number.parseInt(query.page, 10) || 1, 1);
@@ -64,7 +65,7 @@ async function generateOrderNumber(connection) {
   return `${prefix}${String(nextNumber).padStart(4, '0')}`;
 }
 
-async function buildOrderTotals(connection, items) {
+async function buildOrderTotals(connection, items, couponCode) {
   const productIds = items.map((item) => item.product_id);
   const [products] = await connection.query(
     `SELECT id, price, tax_rate
@@ -105,11 +106,17 @@ async function buildOrderTotals(connection, items) {
   const taxAmount = roundMoney(
     orderItems.reduce((sum, item) => sum + item.line_tax, 0)
   );
-  const discountAmount = 0;
+  const discountResult = await calculateOrderDiscounts(connection, {
+    orderItems,
+    subtotal,
+    couponCode,
+  });
+  const discountAmount = discountResult.discount_amount;
   const totalAmount = roundMoney(subtotal + taxAmount - discountAmount);
 
   return {
     orderItems,
+    appliedPromotionIds: discountResult.applied_promotion_ids,
     totals: {
       subtotal,
       tax_amount: taxAmount,
@@ -132,6 +139,24 @@ async function insertOrderItems(connection, orderId, orderItems) {
   await connection.query(
     `INSERT INTO order_items
       (order_id, product_id, quantity, unit_price, tax_rate, line_total)
+     VALUES ?`,
+    [values]
+  );
+}
+
+async function syncOrderPromotions(connection, orderId, promotionIds) {
+  await connection.query('DELETE FROM order_promotions WHERE order_id = ?', [
+    orderId,
+  ]);
+
+  if (promotionIds.length === 0) {
+    return;
+  }
+
+  const values = promotionIds.map((promotionId) => [orderId, promotionId]);
+
+  await connection.query(
+    `INSERT INTO order_promotions (order_id, promotion_id)
      VALUES ?`,
     [values]
   );
@@ -202,6 +227,21 @@ async function fetchOrderDetails(orderId, connection = db) {
     [orderId]
   );
 
+  const [promotions] = await connection.query(
+    `SELECT
+       p.id,
+       p.name,
+       p.type,
+       p.coupon_code,
+       p.discount_type,
+       p.discount_value
+     FROM order_promotions op
+     INNER JOIN promotions p ON p.id = op.promotion_id
+     WHERE op.order_id = ?
+     ORDER BY p.id ASC`,
+    [orderId]
+  );
+
   const order = orders[0];
 
   return {
@@ -242,6 +282,7 @@ async function fetchOrderDetails(orderId, connection = db) {
         }
       : null,
     items,
+    promotions,
   };
 }
 
@@ -319,14 +360,18 @@ async function getOrderById(req, res) {
 }
 
 async function createOrder(req, res) {
-  const { customer_id, table_id, items } = req.body;
+  const { customer_id, table_id, items, coupon_code } = req.body;
   const connection = await db.getConnection();
 
   try {
     await connection.beginTransaction();
 
     const orderNumber = await generateOrderNumber(connection);
-    const { orderItems, totals } = await buildOrderTotals(connection, items);
+    const { orderItems, appliedPromotionIds, totals } = await buildOrderTotals(
+      connection,
+      items,
+      coupon_code
+    );
 
     const [result] = await connection.query(
       `INSERT INTO orders
@@ -346,6 +391,7 @@ async function createOrder(req, res) {
     );
 
     await insertOrderItems(connection, result.insertId, orderItems);
+    await syncOrderPromotions(connection, result.insertId, appliedPromotionIds);
     await setTableStatus(connection, table_id, 'occupied');
 
     const order = await fetchOrderDetails(result.insertId, connection);
@@ -369,7 +415,7 @@ async function createOrder(req, res) {
 }
 
 async function updateOrder(req, res) {
-  const { customer_id, table_id, items } = req.body;
+  const { customer_id, table_id, items, coupon_code } = req.body;
   const connection = await db.getConnection();
 
   try {
@@ -396,7 +442,11 @@ async function updateOrder(req, res) {
       });
     }
 
-    const { orderItems, totals } = await buildOrderTotals(connection, items);
+    const { orderItems, appliedPromotionIds, totals } = await buildOrderTotals(
+      connection,
+      items,
+      coupon_code
+    );
 
     await connection.query(
       `UPDATE orders
@@ -422,6 +472,7 @@ async function updateOrder(req, res) {
       req.params.id,
     ]);
     await insertOrderItems(connection, req.params.id, orderItems);
+    await syncOrderPromotions(connection, req.params.id, appliedPromotionIds);
 
     if (orders[0].table_id && orders[0].table_id !== table_id) {
       await setTableStatus(connection, orders[0].table_id, 'available');

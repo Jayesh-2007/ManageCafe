@@ -111,6 +111,11 @@ const orderBodyValidator = [
   body('items.*.quantity')
     .isInt({ min: 1 })
     .withMessage('Quantity must be at least 1'),
+  body('coupon_code')
+    .optional({ nullable: true, checkFalsy: true })
+    .trim()
+    .isLength({ max: 80 })
+    .withMessage('Coupon code must be at most 80 characters'),
 ];
 
 const createOrderValidator = orderBodyValidator;
