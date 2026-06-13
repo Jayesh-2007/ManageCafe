@@ -79,3 +79,47 @@ Expected response:
   "message": "Backend is running"
 }
 ```
+
+## Authentication
+
+Register an employee user:
+
+```http
+POST /api/auth/register
+Content-Type: application/json
+```
+
+```json
+{
+  "name": "Jayesh",
+  "email": "jayesh@example.com",
+  "password": "password123"
+}
+```
+
+Login:
+
+```http
+POST /api/auth/login
+Content-Type: application/json
+```
+
+```json
+{
+  "email": "jayesh@example.com",
+  "password": "password123"
+}
+```
+
+Use the returned token for protected routes:
+
+```http
+Authorization: Bearer YOUR_TOKEN
+```
+
+Protected test routes:
+
+```http
+GET /api/auth/me
+GET /api/auth/admin-only
+```
