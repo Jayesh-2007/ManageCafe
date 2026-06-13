@@ -1,6 +1,25 @@
 # Cafe POS Backend
 
-Backend foundation for the Cafe POS application, built with Node.js, Express, and MySQL.
+Node.js, Express, and MySQL backend for a cafe POS system.
+
+## Features
+
+- Authentication with JWT
+- Admin and employee roles
+- Categories, products, customers, orders, KDS, promotions, and reports
+- MySQL schema and seed data
+- Swagger documentation
+- Centralized validation and error handling
+
+## Tech Stack
+
+- Node.js
+- Express
+- MySQL
+- JWT
+- bcryptjs
+- express-validator
+- Swagger
 
 ## Setup
 
@@ -10,7 +29,7 @@ Install dependencies:
 npm install
 ```
 
-Create a local environment file by copying the example:
+Create the environment file:
 
 ```bash
 cp .env.example .env
@@ -22,111 +41,94 @@ On Windows PowerShell:
 Copy-Item .env.example .env
 ```
 
-Update `.env` with your local database settings when MySQL is available.
-
-## Run
-
-Start the server in development mode:
-
-```bash
-npm run dev
-```
-
-Start the server normally:
-
-```bash
-npm start
-```
-
-The server defaults to port `5000` unless `PORT` is set in the environment.
-
-<<<<<<< HEAD
-=======
-## Database
-
-The migration script creates the configured MySQL database if it does not already exist, runs `database/schema.sql`, and then runs `database/seed.sql`.
-
-Before running migrations, make sure `.env` contains valid MySQL settings:
+Update `.env`:
 
 ```env
+PORT=5000
 DB_HOST=localhost
 DB_USER=root
 DB_PASS=
 DB_NAME=cafe_pos
 DB_PORT=3306
+JWT_SECRET=your_jwt_secret
 ```
 
-Run the migration and seed data:
+Run migrations and seed data:
 
 ```bash
 npm run db:migrate
 ```
 
-This will create the database tables and insert the initial admin user, product categories, starter products, payment methods, and cafe tables.
+Start the server:
 
->>>>>>> main
-## Health Check
-
-```http
-GET /api/health
+```bash
+npm run dev
 ```
 
-Expected response:
+Or:
+
+```bash
+npm start
+```
+
+Base URL:
+
+```text
+http://localhost:5000
+```
+
+## Demo Admin
 
 ```json
 {
-  "success": true,
-  "message": "Backend is running"
-}
-```
-
-## Authentication
-
-Register an employee user:
-
-```http
-POST /api/auth/register
-Content-Type: application/json
-```
-
-```json
-{
-  "name": "Jayesh",
-  "email": "jayesh@example.com",
+  "email": "admin@cafepos.com",
   "password": "password123"
 }
 ```
+
+Use this account to test admin-only APIs.
+
+## Authentication
 
 Login:
 
 ```http
 POST /api/auth/login
-Content-Type: application/json
 ```
 
 ```json
 {
-  "email": "jayesh@example.com",
+  "email": "admin@cafepos.com",
   "password": "password123"
 }
 ```
 
-Use the returned token for protected routes:
+Use the returned token:
 
 ```http
 Authorization: Bearer YOUR_TOKEN
 ```
 
-Protected test routes:
+## API Overview
+
+### Health
 
 ```http
-GET /api/auth/me
-GET /api/auth/admin-only
+GET /api/health
 ```
 
-## Categories
+### Auth
 
-All category routes require a JWT. Create, update, and delete require an admin token.
+```http
+POST /api/auth/register
+POST /api/auth/login
+GET  /api/auth/me
+GET  /api/auth/admin-only
+```
+
+### Categories
+
+Admin is required for create, update, and delete.
 
 ```http
 GET    /api/categories
@@ -136,138 +138,58 @@ PUT    /api/categories/:id
 DELETE /api/categories/:id
 ```
 
-Create or update body:
+### Products
 
-```json
-{
-  "name": "Beverages",
-  "color": "#2563EB"
-}
-```
-
-## Products
-
-All product routes require a JWT. Create, update, and archive require an admin token.
+Admin is required for create, update, and archive.
 
 ```http
-GET    /api/products?page=1&limit=20&search=tea&category_id=1
+GET    /api/products
 GET    /api/products/:id
 POST   /api/products
 PUT    /api/products/:id
 DELETE /api/products/:id
 ```
 
-Create or update body:
-
-```json
-{
-  "name": "Masala Tea",
-  "category_id": 1,
-  "price": 20,
-  "tax_rate": "5",
-  "description": "Hot tea"
-}
-```
-
-## Customers
-
-All customer routes require a JWT. Admin and employee users are both allowed.
+### Customers
 
 ```http
-GET    /api/customers?page=1&limit=20&search=jayesh
+GET    /api/customers
 GET    /api/customers/:id
 POST   /api/customers
 PUT    /api/customers/:id
 DELETE /api/customers/:id
 ```
 
-Create or update body:
-
-```json
-{
-  "name": "Jayesh Hadiyal",
-  "email": "jayesh@example.com",
-  "phone": "9876543210"
-}
-```
-
-## Orders
-
-All order routes require a JWT. Orders start as `draft` and can be marked `paid`.
+### Orders
 
 ```http
-GET    /api/orders?page=1&limit=20&search=ORD&status=draft
-GET    /api/orders/:id
-POST   /api/orders
-PUT    /api/orders/:id
+GET  /api/orders
+GET  /api/orders/:id
+POST /api/orders
+PUT  /api/orders/:id
 DELETE /api/orders/:id
-POST   /api/orders/:id/send-to-kitchen
-POST   /api/orders/:id/pay
+POST /api/orders/:id/send-to-kitchen
+POST /api/orders/:id/pay
 ```
 
-Create or update draft order body:
-
-```json
-{
-  "customer_id": 1,
-  "table_id": 3,
-  "items": [
-    {
-      "product_id": 1,
-      "quantity": 2
-    },
-    {
-      "product_id": 2,
-      "quantity": 1
-    }
-  ]
-}
-```
-
-Pay order body:
-
-```json
-{
-  "payment_method_id": 1
-}
-```
-
-## Kitchen Display System
-
-All KDS routes require a JWT. Completed kitchen orders older than 24 hours are excluded from the main KDS list.
+### Kitchen Display System
 
 ```http
 GET /api/kds
-GET /api/kds?kds_status=to_cook
-GET /api/kds?q=tea
 GET /api/kds/stats
 GET /api/kds/:id
 PUT /api/kds/:id/status
 ```
 
-Update KDS status body:
+Valid KDS flow:
 
-```json
-{
-  "kds_status": "preparing"
-}
+```text
+to_cook -> preparing -> completed
 ```
 
-## Reports
+### Promotions
 
-All report routes require an admin JWT. Date filters use `YYYY-MM-DD`.
-
-```http
-GET /api/reports/summary?startDate=2026-01-01&endDate=2026-12-31
-GET /api/reports/sales-trend?startDate=2026-01-01&endDate=2026-12-31
-GET /api/reports/top-products?startDate=2026-01-01&endDate=2026-12-31
-GET /api/reports/top-categories?startDate=2026-01-01&endDate=2026-12-31
-GET /api/reports/export?format=csv&startDate=2026-01-01&endDate=2026-12-31
-```
-
-## Promotions
-
-Promotion reads require a JWT. Create, update, and delete require an admin JWT.
+Admin is required for create, update, and delete.
 
 ```http
 GET    /api/promotions
@@ -278,27 +200,61 @@ DELETE /api/promotions/:id
 POST   /api/promotions/validate
 ```
 
-Coupon validation body:
+### Reports
+
+Admin only.
+
+```http
+GET /api/reports/summary
+GET /api/reports/sales-trend
+GET /api/reports/top-products
+GET /api/reports/top-categories
+GET /api/reports/export?format=csv
+```
+
+Date filters:
+
+```text
+?startDate=2026-01-01&endDate=2026-12-31
+```
+
+## Swagger
+
+```text
+http://localhost:5000/api/docs
+```
+
+## Standard JSON Response
+
+Most JSON APIs return:
 
 ```json
 {
-  "coupon_code": "SUMMER20",
-  "subtotal": 1000
+  "success": true,
+  "data": {}
 }
 ```
 
-Orders may include an optional coupon code:
+Error responses return:
 
 ```json
 {
-  "customer_id": 1,
-  "table_id": 3,
-  "coupon_code": "SUMMER20",
-  "items": [
-    {
-      "product_id": 1,
-      "quantity": 2
-    }
-  ]
+  "success": false,
+  "message": "Error message"
 }
 ```
+
+`/api/reports/export` returns CSV.
+
+## Useful Test Flow
+
+1. Login as admin.
+2. Create a category.
+3. Create a product.
+4. Create a customer.
+5. Create an order.
+6. Send the order to kitchen.
+7. Move KDS status to `preparing`.
+8. Move KDS status to `completed`.
+9. Pay the order.
+10. Check reports.
