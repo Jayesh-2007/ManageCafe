@@ -1,5 +1,6 @@
 const db = require('../models/db');
 const { calculateOrderDiscounts } = require('../utils/discountEngine');
+const AppError = require('../utils/AppError');
 
 function getPagination(query) {
   const page = Math.max(Number.parseInt(query.page, 10) || 1, 1);
@@ -286,7 +287,7 @@ async function fetchOrderDetails(orderId, connection = db) {
   };
 }
 
-async function getOrders(req, res) {
+async function getOrders(req, res, next) {
   const { page, limit, offset } = getPagination(req.query);
   const { whereClause, values } = buildOrderFilters(req.query);
 
@@ -329,22 +330,16 @@ async function getOrders(req, res) {
       data: orders,
     });
   } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: 'Unable to fetch orders',
-    });
+    return next(error);
   }
 }
 
-async function getOrderById(req, res) {
+async function getOrderById(req, res, next) {
   try {
     const order = await fetchOrderDetails(req.params.id);
 
     if (!order) {
-      return res.status(404).json({
-        success: false,
-        message: 'Order not found',
-      });
+      return next(new AppError('Order not found', 404));
     }
 
     return res.status(200).json({
@@ -352,18 +347,16 @@ async function getOrderById(req, res) {
       data: order,
     });
   } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: 'Unable to fetch order',
-    });
+    return next(error);
   }
 }
 
-async function createOrder(req, res) {
+async function createOrder(req, res, next) {
   const { customer_id, table_id, items, coupon_code } = req.body;
-  const connection = await db.getConnection();
+  let connection;
 
   try {
+    connection = await db.getConnection();
     await connection.beginTransaction();
 
     const orderNumber = await generateOrderNumber(connection);
@@ -403,22 +396,23 @@ async function createOrder(req, res) {
       data: order,
     });
   } catch (error) {
-    await connection.rollback();
-
-    return res.status(error.statusCode || 500).json({
-      success: false,
-      message: error.statusCode ? error.message : 'Unable to create order',
-    });
+    if (connection) {
+      await connection.rollback();
+    }
+    return next(error);
   } finally {
-    connection.release();
+    if (connection) {
+      connection.release();
+    }
   }
 }
 
-async function updateOrder(req, res) {
+async function updateOrder(req, res, next) {
   const { customer_id, table_id, items, coupon_code } = req.body;
-  const connection = await db.getConnection();
+  let connection;
 
   try {
+    connection = await db.getConnection();
     await connection.beginTransaction();
 
     const [orders] = await connection.query(
@@ -428,18 +422,12 @@ async function updateOrder(req, res) {
 
     if (orders.length === 0) {
       await connection.rollback();
-      return res.status(404).json({
-        success: false,
-        message: 'Order not found',
-      });
+      return next(new AppError('Order not found', 404));
     }
 
     if (orders[0].status === 'paid') {
       await connection.rollback();
-      return res.status(409).json({
-        success: false,
-        message: 'Paid orders cannot be modified',
-      });
+      return next(new AppError('Paid orders cannot be modified', 409));
     }
 
     const { orderItems, appliedPromotionIds, totals } = await buildOrderTotals(
@@ -489,21 +477,22 @@ async function updateOrder(req, res) {
       data: order,
     });
   } catch (error) {
-    await connection.rollback();
-
-    return res.status(error.statusCode || 500).json({
-      success: false,
-      message: error.statusCode ? error.message : 'Unable to update order',
-    });
+    if (connection) {
+      await connection.rollback();
+    }
+    return next(error);
   } finally {
-    connection.release();
+    if (connection) {
+      connection.release();
+    }
   }
 }
 
-async function deleteOrder(req, res) {
-  const connection = await db.getConnection();
+async function deleteOrder(req, res, next) {
+  let connection;
 
   try {
+    connection = await db.getConnection();
     await connection.beginTransaction();
 
     const [orders] = await connection.query(
@@ -513,18 +502,12 @@ async function deleteOrder(req, res) {
 
     if (orders.length === 0) {
       await connection.rollback();
-      return res.status(404).json({
-        success: false,
-        message: 'Order not found',
-      });
+      return next(new AppError('Order not found', 404));
     }
 
     if (orders[0].status === 'paid') {
       await connection.rollback();
-      return res.status(409).json({
-        success: false,
-        message: 'Paid orders cannot be deleted',
-      });
+      return next(new AppError('Paid orders cannot be deleted', 409));
     }
 
     await connection.query('DELETE FROM order_promotions WHERE order_id = ?', [
@@ -546,18 +529,18 @@ async function deleteOrder(req, res) {
       },
     });
   } catch (error) {
-    await connection.rollback();
-
-    return res.status(500).json({
-      success: false,
-      message: 'Unable to delete order',
-    });
+    if (connection) {
+      await connection.rollback();
+    }
+    return next(error);
   } finally {
-    connection.release();
+    if (connection) {
+      connection.release();
+    }
   }
 }
 
-async function sendToKitchen(req, res) {
+async function sendToKitchen(req, res, next) {
   try {
     const [orders] = await db.query(
       'SELECT id, status FROM orders WHERE id = ? LIMIT 1',
@@ -565,17 +548,11 @@ async function sendToKitchen(req, res) {
     );
 
     if (orders.length === 0) {
-      return res.status(404).json({
-        success: false,
-        message: 'Order not found',
-      });
+      return next(new AppError('Order not found', 404));
     }
 
     if (orders[0].status === 'paid') {
-      return res.status(409).json({
-        success: false,
-        message: 'Paid orders cannot be modified',
-      });
+      return next(new AppError('Paid orders cannot be modified', 409));
     }
 
     await db.query(
@@ -592,17 +569,15 @@ async function sendToKitchen(req, res) {
       data: order,
     });
   } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: 'Unable to send order to kitchen',
-    });
+    return next(error);
   }
 }
 
-async function payOrder(req, res) {
-  const connection = await db.getConnection();
+async function payOrder(req, res, next) {
+  let connection;
 
   try {
+    connection = await db.getConnection();
     await connection.beginTransaction();
 
     const [orders] = await connection.query(
@@ -612,18 +587,12 @@ async function payOrder(req, res) {
 
     if (orders.length === 0) {
       await connection.rollback();
-      return res.status(404).json({
-        success: false,
-        message: 'Order not found',
-      });
+      return next(new AppError('Order not found', 404));
     }
 
     if (orders[0].status === 'paid') {
       await connection.rollback();
-      return res.status(409).json({
-        success: false,
-        message: 'Order is already paid',
-      });
+      return next(new AppError('Order is already paid', 409));
     }
 
     await connection.query(
@@ -644,14 +613,14 @@ async function payOrder(req, res) {
       data: order,
     });
   } catch (error) {
-    await connection.rollback();
-
-    return res.status(500).json({
-      success: false,
-      message: 'Unable to mark order as paid',
-    });
+    if (connection) {
+      await connection.rollback();
+    }
+    return next(error);
   } finally {
-    connection.release();
+    if (connection) {
+      connection.release();
+    }
   }
 }
 

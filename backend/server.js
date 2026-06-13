@@ -10,6 +10,8 @@ const orderRoutes = require('./routes/orderRoutes');
 const productRoutes = require('./routes/productRoutes');
 const promotionRoutes = require('./routes/promotionRoutes');
 const reportRoutes = require('./routes/reportRoutes');
+const notFound = require('./middleware/notFound');
+const errorHandler = require('./middleware/errorHandler');
 
 const app = express();
 
@@ -31,6 +33,9 @@ app.get('/api/health', (req, res) => {
     message: 'Backend is running',
   });
 });
+
+app.use(notFound);
+app.use(errorHandler);
 
 const PORT = process.env.PORT || 5000;
 

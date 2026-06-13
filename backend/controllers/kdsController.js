@@ -1,4 +1,5 @@
 const db = require('../models/db');
+const AppError = require('../utils/AppError');
 
 const validTransitions = {
   to_cook: ['preparing'],
@@ -79,7 +80,7 @@ function buildKdsFilters(query) {
   };
 }
 
-async function getKdsOrders(req, res) {
+async function getKdsOrders(req, res, next) {
   const { whereClause, values } = buildKdsFilters(req.query);
 
   try {
@@ -108,14 +109,11 @@ async function getKdsOrders(req, res) {
       data: ordersWithItems,
     });
   } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: 'Unable to fetch kitchen orders',
-    });
+    return next(error);
   }
 }
 
-async function getKdsOrderById(req, res) {
+async function getKdsOrderById(req, res, next) {
   try {
     const [orders] = await db.query(
       `SELECT
@@ -134,10 +132,7 @@ async function getKdsOrderById(req, res) {
     );
 
     if (orders.length === 0) {
-      return res.status(404).json({
-        success: false,
-        message: 'Kitchen order not found',
-      });
+      return next(new AppError('Kitchen order not found', 404));
     }
 
     const [order] = await attachItemsToOrders(orders);
@@ -147,14 +142,11 @@ async function getKdsOrderById(req, res) {
       data: order,
     });
   } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: 'Unable to fetch kitchen order',
-    });
+    return next(error);
   }
 }
 
-async function getKdsStats(req, res) {
+async function getKdsStats(req, res, next) {
   try {
     const [rows] = await db.query(
       `SELECT kds_status, COUNT(*) AS count
@@ -177,14 +169,11 @@ async function getKdsStats(req, res) {
       data: stats,
     });
   } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: 'Unable to fetch kitchen stats',
-    });
+    return next(error);
   }
 }
 
-async function updateKdsStatus(req, res) {
+async function updateKdsStatus(req, res, next) {
   const { kds_status } = req.body;
 
   try {
@@ -194,20 +183,19 @@ async function updateKdsStatus(req, res) {
     );
 
     if (orders.length === 0) {
-      return res.status(404).json({
-        success: false,
-        message: 'Kitchen order not found',
-      });
+      return next(new AppError('Kitchen order not found', 404));
     }
 
     const currentStatus = orders[0].kds_status;
     const allowedNextStatuses = validTransitions[currentStatus] || [];
 
     if (!allowedNextStatuses.includes(kds_status)) {
-      return res.status(409).json({
-        success: false,
-        message: `Invalid KDS status transition from ${currentStatus} to ${kds_status}`,
-      });
+      return next(
+        new AppError(
+          `Invalid KDS status transition from ${currentStatus} to ${kds_status}`,
+          409
+        )
+      );
     }
 
     await db.query('UPDATE orders SET kds_status = ? WHERE id = ?', [
@@ -238,10 +226,7 @@ async function updateKdsStatus(req, res) {
       data: order,
     });
   } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: 'Unable to update kitchen status',
-    });
+    return next(error);
   }
 }
 

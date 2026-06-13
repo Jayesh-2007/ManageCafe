@@ -1,7 +1,8 @@
 const db = require('../models/db');
 const { validateCouponDiscount } = require('../utils/discountEngine');
+const AppError = require('../utils/AppError');
 
-async function getPromotions(req, res) {
+async function getPromotions(req, res, next) {
   try {
     const [promotions] = await db.query(
       `SELECT id, name, type, coupon_code, discount_type, discount_value,
@@ -15,14 +16,11 @@ async function getPromotions(req, res) {
       data: promotions,
     });
   } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: 'Unable to fetch promotions',
-    });
+    return next(error);
   }
 }
 
-async function getPromotionById(req, res) {
+async function getPromotionById(req, res, next) {
   try {
     const [promotions] = await db.query(
       `SELECT id, name, type, coupon_code, discount_type, discount_value,
@@ -34,10 +32,7 @@ async function getPromotionById(req, res) {
     );
 
     if (promotions.length === 0) {
-      return res.status(404).json({
-        success: false,
-        message: 'Promotion not found',
-      });
+      return next(new AppError('Promotion not found', 404));
     }
 
     return res.status(200).json({
@@ -45,14 +40,11 @@ async function getPromotionById(req, res) {
       data: promotions[0],
     });
   } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: 'Unable to fetch promotion',
-    });
+    return next(error);
   }
 }
 
-async function createPromotion(req, res) {
+async function createPromotion(req, res, next) {
   const {
     name,
     type,
@@ -95,14 +87,11 @@ async function createPromotion(req, res) {
       data: promotions[0],
     });
   } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: 'Unable to create promotion',
-    });
+    return next(error);
   }
 }
 
-async function updatePromotion(req, res) {
+async function updatePromotion(req, res, next) {
   const {
     name,
     type,
@@ -140,10 +129,7 @@ async function updatePromotion(req, res) {
     );
 
     if (result.affectedRows === 0) {
-      return res.status(404).json({
-        success: false,
-        message: 'Promotion not found',
-      });
+      return next(new AppError('Promotion not found', 404));
     }
 
     const [promotions] = await db.query(
@@ -159,14 +145,11 @@ async function updatePromotion(req, res) {
       data: promotions[0],
     });
   } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: 'Unable to update promotion',
-    });
+    return next(error);
   }
 }
 
-async function deletePromotion(req, res) {
+async function deletePromotion(req, res, next) {
   try {
     await db.query('DELETE FROM order_promotions WHERE promotion_id = ?', [
       req.params.id,
@@ -177,10 +160,7 @@ async function deletePromotion(req, res) {
     ]);
 
     if (result.affectedRows === 0) {
-      return res.status(404).json({
-        success: false,
-        message: 'Promotion not found',
-      });
+      return next(new AppError('Promotion not found', 404));
     }
 
     return res.status(200).json({
@@ -191,14 +171,11 @@ async function deletePromotion(req, res) {
       },
     });
   } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: 'Unable to delete promotion',
-    });
+    return next(error);
   }
 }
 
-async function validatePromotionCoupon(req, res) {
+async function validatePromotionCoupon(req, res, next) {
   const { coupon_code, subtotal } = req.body;
 
   try {
@@ -209,10 +186,7 @@ async function validatePromotionCoupon(req, res) {
       data,
     });
   } catch (error) {
-    return res.status(error.statusCode || 500).json({
-      success: false,
-      message: error.statusCode ? error.message : 'Unable to validate coupon',
-    });
+    return next(error);
   }
 }
 

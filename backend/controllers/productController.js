@@ -1,4 +1,5 @@
 const db = require('../models/db');
+const AppError = require('../utils/AppError');
 
 function getPagination(query) {
   const page = Math.max(Number.parseInt(query.page, 10) || 1, 1);
@@ -29,7 +30,7 @@ function buildProductFilters(query) {
   };
 }
 
-async function getProducts(req, res) {
+async function getProducts(req, res, next) {
   const { page, limit, offset } = getPagination(req.query);
   const { whereClause, values } = buildProductFilters(req.query);
 
@@ -69,14 +70,11 @@ async function getProducts(req, res) {
       data: products,
     });
   } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: 'Unable to fetch products',
-    });
+    return next(error);
   }
 }
 
-async function getProductById(req, res) {
+async function getProductById(req, res, next) {
   try {
     const [products] = await db.query(
       `SELECT
@@ -98,10 +96,7 @@ async function getProductById(req, res) {
     );
 
     if (products.length === 0) {
-      return res.status(404).json({
-        success: false,
-        message: 'Product not found',
-      });
+      return next(new AppError('Product not found', 404));
     }
 
     return res.status(200).json({
@@ -109,14 +104,11 @@ async function getProductById(req, res) {
       data: products[0],
     });
   } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: 'Unable to fetch product',
-    });
+    return next(error);
   }
 }
 
-async function createProduct(req, res) {
+async function createProduct(req, res, next) {
   const { name, category_id, price, tax_rate, description } = req.body;
 
   try {
@@ -150,14 +142,11 @@ async function createProduct(req, res) {
       data: products[0],
     });
   } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: 'Unable to create product',
-    });
+    return next(error);
   }
 }
 
-async function updateProduct(req, res) {
+async function updateProduct(req, res, next) {
   const { name, category_id, price, tax_rate, description } = req.body;
 
   try {
@@ -173,10 +162,7 @@ async function updateProduct(req, res) {
     );
 
     if (result.affectedRows === 0) {
-      return res.status(404).json({
-        success: false,
-        message: 'Product not found',
-      });
+      return next(new AppError('Product not found', 404));
     }
 
     const [products] = await db.query(
@@ -202,14 +188,11 @@ async function updateProduct(req, res) {
       data: products[0],
     });
   } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: 'Unable to update product',
-    });
+    return next(error);
   }
 }
 
-async function archiveProduct(req, res) {
+async function archiveProduct(req, res, next) {
   try {
     const [result] = await db.query(
       `UPDATE products
@@ -219,10 +202,7 @@ async function archiveProduct(req, res) {
     );
 
     if (result.affectedRows === 0) {
-      return res.status(404).json({
-        success: false,
-        message: 'Product not found',
-      });
+      return next(new AppError('Product not found', 404));
     }
 
     return res.status(200).json({
@@ -233,10 +213,7 @@ async function archiveProduct(req, res) {
       },
     });
   } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: 'Unable to archive product',
-    });
+    return next(error);
   }
 }
 

@@ -53,7 +53,7 @@ function toCsv(rows) {
   return `${lines.join('\n')}\n`;
 }
 
-async function getSummary(req, res) {
+async function getSummary(req, res, next) {
   const { whereClause, values } = buildDateFilter(req.query);
 
   try {
@@ -102,14 +102,11 @@ async function getSummary(req, res) {
       },
     });
   } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: 'Unable to fetch report summary',
-    });
+    return next(error);
   }
 }
 
-async function getSalesTrend(req, res) {
+async function getSalesTrend(req, res, next) {
   const { whereClause, values } = buildDateFilter(req.query);
 
   try {
@@ -132,14 +129,11 @@ async function getSalesTrend(req, res) {
       })),
     });
   } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: 'Unable to fetch sales trend',
-    });
+    return next(error);
   }
 }
 
-async function getTopProducts(req, res) {
+async function getTopProducts(req, res, next) {
   const { whereClause, values } = buildDateFilter(req.query);
 
   try {
@@ -168,14 +162,11 @@ async function getTopProducts(req, res) {
       })),
     });
   } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: 'Unable to fetch top products',
-    });
+    return next(error);
   }
 }
 
-async function getTopCategories(req, res) {
+async function getTopCategories(req, res, next) {
   const { whereClause, values } = buildDateFilter(req.query);
 
   try {
@@ -201,14 +192,11 @@ async function getTopCategories(req, res) {
       })),
     });
   } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: 'Unable to fetch top categories',
-    });
+    return next(error);
   }
 }
 
-async function exportReport(req, res) {
+async function exportReport(req, res, next) {
   const { whereClause, values } = buildDateFilter(req.query);
 
   try {
@@ -235,10 +223,7 @@ async function exportReport(req, res) {
 
     return res.status(200).send(toCsv(rows));
   } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: 'Unable to export report',
-    });
+    return next(error);
   }
 }
 

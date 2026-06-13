@@ -1,17 +1,13 @@
+const AppError = require('../utils/AppError');
+
 function authorize(...roles) {
   return (req, res, next) => {
     if (!req.user) {
-      return res.status(401).json({
-        success: false,
-        message: 'Unauthorized',
-      });
+      return next(new AppError('Unauthorized', 401));
     }
 
     if (!roles.includes(req.user.role)) {
-      return res.status(403).json({
-        success: false,
-        message: 'Forbidden',
-      });
+      return next(new AppError('Forbidden', 403));
     }
 
     return next();

@@ -1,8 +1,9 @@
 const bcrypt = require('bcryptjs');
 const db = require('../models/db');
 const { generateToken } = require('../utils/jwt');
+const AppError = require('../utils/AppError');
 
-async function register(req, res) {
+async function register(req, res, next) {
   const { name, email, password } = req.body;
 
   try {
@@ -12,10 +13,7 @@ async function register(req, res) {
     );
 
     if (existingUsers.length > 0) {
-      return res.status(409).json({
-        success: false,
-        message: 'Email is already registered',
-      });
+      return next(new AppError('Email is already registered', 409));
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -31,14 +29,11 @@ async function register(req, res) {
       message: 'User registered successfully',
     });
   } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: 'Unable to register user',
-    });
+    return next(error);
   }
 }
 
-async function login(req, res) {
+async function login(req, res, next) {
   const { email, password } = req.body;
 
   try {
@@ -51,27 +46,18 @@ async function login(req, res) {
     );
 
     if (users.length === 0) {
-      return res.status(401).json({
-        success: false,
-        message: 'Invalid email or password',
-      });
+      return next(new AppError('Invalid email or password', 401));
     }
 
     const user = users[0];
     const passwordMatches = await bcrypt.compare(password, user.password);
 
     if (!passwordMatches) {
-      return res.status(401).json({
-        success: false,
-        message: 'Invalid email or password',
-      });
+      return next(new AppError('Invalid email or password', 401));
     }
 
     if (user.status === 'disabled') {
-      return res.status(403).json({
-        success: false,
-        message: 'User account is disabled',
-      });
+      return next(new AppError('User account is disabled', 403));
     }
 
     const token = generateToken({
@@ -91,12 +77,7 @@ async function login(req, res) {
       },
     });
   } catch (error) {
-    const isConfigError = error.message === 'JWT_SECRET is not configured';
-
-    return res.status(500).json({
-      success: false,
-      message: isConfigError ? error.message : 'Unable to login',
-    });
+    return next(error);
   }
 }
 

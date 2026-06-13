@@ -1,4 +1,5 @@
 const db = require('../models/db');
+const AppError = require('../utils/AppError');
 
 function getPagination(query) {
   const page = Math.max(Number.parseInt(query.page, 10) || 1, 1);
@@ -24,7 +25,7 @@ function buildCustomerFilters(query) {
   };
 }
 
-async function getCustomers(req, res) {
+async function getCustomers(req, res, next) {
   const { page, limit, offset } = getPagination(req.query);
   const { whereClause, values } = buildCustomerFilters(req.query);
 
@@ -53,14 +54,11 @@ async function getCustomers(req, res) {
       data: customers,
     });
   } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: 'Unable to fetch customers',
-    });
+    return next(error);
   }
 }
 
-async function getCustomerById(req, res) {
+async function getCustomerById(req, res, next) {
   try {
     const [customers] = await db.query(
       `SELECT id, name, email, phone, created_at, updated_at
@@ -71,10 +69,7 @@ async function getCustomerById(req, res) {
     );
 
     if (customers.length === 0) {
-      return res.status(404).json({
-        success: false,
-        message: 'Customer not found',
-      });
+      return next(new AppError('Customer not found', 404));
     }
 
     return res.status(200).json({
@@ -82,14 +77,11 @@ async function getCustomerById(req, res) {
       data: customers[0],
     });
   } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: 'Unable to fetch customer',
-    });
+    return next(error);
   }
 }
 
-async function createCustomer(req, res) {
+async function createCustomer(req, res, next) {
   const { name, phone } = req.body;
   const email = req.body.email || null;
 
@@ -112,14 +104,11 @@ async function createCustomer(req, res) {
       data: customers[0],
     });
   } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: 'Unable to create customer',
-    });
+    return next(error);
   }
 }
 
-async function updateCustomer(req, res) {
+async function updateCustomer(req, res, next) {
   const { name, phone } = req.body;
   const email = req.body.email || null;
 
@@ -132,10 +121,7 @@ async function updateCustomer(req, res) {
     );
 
     if (result.affectedRows === 0) {
-      return res.status(404).json({
-        success: false,
-        message: 'Customer not found',
-      });
+      return next(new AppError('Customer not found', 404));
     }
 
     const [customers] = await db.query(
@@ -150,14 +136,11 @@ async function updateCustomer(req, res) {
       data: customers[0],
     });
   } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: 'Unable to update customer',
-    });
+    return next(error);
   }
 }
 
-async function deleteCustomer(req, res) {
+async function deleteCustomer(req, res, next) {
   try {
     const [orders] = await db.query(
       'SELECT id FROM orders WHERE customer_id = ? LIMIT 1',
@@ -165,10 +148,9 @@ async function deleteCustomer(req, res) {
     );
 
     if (orders.length > 0) {
-      return res.status(409).json({
-        success: false,
-        message: 'Customer is linked to orders and cannot be deleted',
-      });
+      return next(
+        new AppError('Customer is linked to orders and cannot be deleted', 409)
+      );
     }
 
     const [result] = await db.query('DELETE FROM customers WHERE id = ?', [
@@ -176,10 +158,7 @@ async function deleteCustomer(req, res) {
     ]);
 
     if (result.affectedRows === 0) {
-      return res.status(404).json({
-        success: false,
-        message: 'Customer not found',
-      });
+      return next(new AppError('Customer not found', 404));
     }
 
     return res.status(200).json({
@@ -190,10 +169,7 @@ async function deleteCustomer(req, res) {
       },
     });
   } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: 'Unable to delete customer',
-    });
+    return next(error);
   }
 }
 

@@ -1,6 +1,7 @@
 const db = require('../models/db');
+const AppError = require('../utils/AppError');
 
-async function getCategories(req, res) {
+async function getCategories(req, res, next) {
   try {
     const [categories] = await db.query(
       `SELECT id, name, color, created_at
@@ -13,14 +14,11 @@ async function getCategories(req, res) {
       data: categories,
     });
   } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: 'Unable to fetch categories',
-    });
+    return next(error);
   }
 }
 
-async function getCategoryById(req, res) {
+async function getCategoryById(req, res, next) {
   try {
     const [categories] = await db.query(
       `SELECT id, name, color, created_at
@@ -31,10 +29,7 @@ async function getCategoryById(req, res) {
     );
 
     if (categories.length === 0) {
-      return res.status(404).json({
-        success: false,
-        message: 'Category not found',
-      });
+      return next(new AppError('Category not found', 404));
     }
 
     return res.status(200).json({
@@ -42,14 +37,11 @@ async function getCategoryById(req, res) {
       data: categories[0],
     });
   } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: 'Unable to fetch category',
-    });
+    return next(error);
   }
 }
 
-async function createCategory(req, res) {
+async function createCategory(req, res, next) {
   const { name, color } = req.body;
 
   try {
@@ -71,14 +63,11 @@ async function createCategory(req, res) {
       data: categories[0],
     });
   } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: 'Unable to create category',
-    });
+    return next(error);
   }
 }
 
-async function updateCategory(req, res) {
+async function updateCategory(req, res, next) {
   const { name, color } = req.body;
 
   try {
@@ -90,10 +79,7 @@ async function updateCategory(req, res) {
     );
 
     if (result.affectedRows === 0) {
-      return res.status(404).json({
-        success: false,
-        message: 'Category not found',
-      });
+      return next(new AppError('Category not found', 404));
     }
 
     const [categories] = await db.query(
@@ -108,14 +94,11 @@ async function updateCategory(req, res) {
       data: categories[0],
     });
   } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: 'Unable to update category',
-    });
+    return next(error);
   }
 }
 
-async function deleteCategory(req, res) {
+async function deleteCategory(req, res, next) {
   try {
     const [products] = await db.query(
       'SELECT id FROM products WHERE category_id = ? LIMIT 1',
@@ -123,10 +106,7 @@ async function deleteCategory(req, res) {
     );
 
     if (products.length > 0) {
-      return res.status(409).json({
-        success: false,
-        message: 'Category is in use and cannot be deleted',
-      });
+      return next(new AppError('Category is in use and cannot be deleted', 409));
     }
 
     const [result] = await db.query(
@@ -135,10 +115,7 @@ async function deleteCategory(req, res) {
     );
 
     if (result.affectedRows === 0) {
-      return res.status(404).json({
-        success: false,
-        message: 'Category not found',
-      });
+      return next(new AppError('Category not found', 404));
     }
 
     return res.status(200).json({
@@ -149,10 +126,7 @@ async function deleteCategory(req, res) {
       },
     });
   } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: 'Unable to delete category',
-    });
+    return next(error);
   }
 }
 
