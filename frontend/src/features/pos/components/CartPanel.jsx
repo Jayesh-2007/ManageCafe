@@ -93,22 +93,27 @@ function CartPanel({ items, onQuantityChange }) {
   });
 
   return (
-    <aside className="flex min-h-0 w-full flex-col border-l border-border bg-background lg:w-[320px]">
+    <aside className="flex min-h-0 w-full flex-col border-l border-border bg-background lg:w-[320px] shrink-0">
       {/* Header Tabs */}
       <header className="border-b border-border p-4">
-        <div className="grid grid-cols-3 overflow-hidden rounded border border-border text-center text-label">
-          {tabs.map((tab) => (
-            <button
-              key={tab}
-              type="button"
-              onClick={() => setActiveTab(tab)}
-              className={`px-2 py-2 transition-colors ${
-                activeTab === tab ? 'bg-accent text-background font-semibold' : 'bg-surface text-copy-secondary hover:bg-border/20'
-              }`}
-            >
-              {tab}
-            </button>
-          ))}
+        <div className="flex rounded-lg bg-border/40 p-1 text-center text-label gap-1">
+          {tabs.map((tab) => {
+            const isSelected = activeTab === tab;
+            return (
+              <button
+                key={tab}
+                type="button"
+                onClick={() => setActiveTab(tab)}
+                className={`flex-1 py-2 rounded-md transition-all duration-150 active:scale-[0.98] text-center font-bold ${
+                  isSelected
+                    ? 'bg-surface text-accent shadow-sm border border-border/20'
+                    : 'text-copy-secondary hover:text-copy-primary hover:bg-surface/50'
+                }`}
+              >
+                {tab}
+              </button>
+            );
+          })}
         </div>
       </header>
 
@@ -127,29 +132,23 @@ function CartPanel({ items, onQuantityChange }) {
           <div className="flex flex-col gap-4 animate-modal-in">
             {/* Payment Methods */}
             <fieldset className="flex flex-col gap-2 border-0 p-0 m-0">
-              <legend className="text-label font-semibold text-copy-primary">Payment Method</legend>
-              <div className="flex flex-col gap-2">
+              <legend className="text-label font-bold text-copy-primary">Payment Method</legend>
+              <div className="grid grid-cols-3 gap-2">
                 {['Cash', 'UPI', 'Card'].map((method) => {
                   const isChecked = paymentMethod === method;
                   return (
-                    <label
+                    <button
                       key={method}
-                      className={`flex min-h-12 items-center gap-2 rounded border px-4 cursor-pointer transition-all ${
+                      type="button"
+                      onClick={() => setPaymentMethod(method)}
+                      className={`flex flex-col items-center justify-center min-h-[56px] rounded-lg border text-center transition-all duration-150 active:scale-[0.97] cursor-pointer ${
                         isChecked
-                          ? 'border-accent bg-surface font-semibold text-accent'
-                          : 'border-border bg-background hover:bg-surface/50 text-copy-primary'
+                          ? 'border-accent bg-surface font-bold text-accent shadow-sm'
+                          : 'border-border bg-background hover:bg-surface/50 text-copy-secondary'
                       }`}
                     >
-                      <input
-                        type="radio"
-                        name="paymentMethod"
-                        value={method}
-                        checked={isChecked}
-                        onChange={() => setPaymentMethod(method)}
-                        className="h-4 w-4 accent-accent"
-                      />
                       <span className="text-body">{method}</span>
-                    </label>
+                    </button>
                   );
                 })}
               </div>
@@ -157,22 +156,25 @@ function CartPanel({ items, onQuantityChange }) {
 
             {/* Payment Amount */}
             <div className="flex flex-col gap-1">
-              <label className="text-label font-semibold text-copy-primary" htmlFor="payment-amount">
+              <label className="text-label font-bold text-copy-primary" htmlFor="payment-amount">
                 Amount
               </label>
-              <input
-                id="payment-amount"
-                inputMode="numeric"
-                value={amount}
-                onChange={(event) => {
-                  setShowPaymentErrors(false);
-                  setAmount(event.target.value);
-                }}
-                className={`min-h-12 rounded border bg-background px-4 text-body outline-none focus:border-accent transition-all ${
-                  isAmountInvalid ? 'border-error' : 'border-border'
-                }`}
-                placeholder="Enter amount"
-              />
+              <div className="relative">
+                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-body font-bold text-copy-secondary">₹</span>
+                <input
+                  id="payment-amount"
+                  inputMode="numeric"
+                  value={amount}
+                  onChange={(event) => {
+                    setShowPaymentErrors(false);
+                    setAmount(event.target.value);
+                  }}
+                  className={`w-full min-h-12 rounded-lg border bg-background pl-8 pr-4 text-body font-bold text-copy-primary outline-none focus:border-accent focus:ring-2 focus:ring-accent/10 transition-all ${
+                    isAmountInvalid ? 'border-error focus:ring-error/10' : 'border-border'
+                  }`}
+                  placeholder="0.00"
+                />
+              </div>
               <ErrorMessage message={isAmountInvalid ? amountError : ''} />
             </div>
 
@@ -183,7 +185,7 @@ function CartPanel({ items, onQuantityChange }) {
                   key={key}
                   type="button"
                   onClick={() => handleKeypadClick(key)}
-                  className="min-h-12 rounded border border-border bg-surface text-body font-semibold text-copy-primary hover:border-accent hover:bg-background transition-all active:scale-95"
+                  className="min-h-12 rounded-lg border border-border bg-surface text-body font-bold text-copy-primary hover:border-accent hover:bg-background transition-all active:scale-[0.95] shadow-sm"
                 >
                   {key}
                 </button>
@@ -191,39 +193,39 @@ function CartPanel({ items, onQuantityChange }) {
               <button
                 type="button"
                 onClick={() => handleKeypadClick('X')}
-                className="col-span-3 min-h-12 rounded border border-error bg-surface text-body font-semibold text-error hover:bg-error hover:text-background transition-all active:scale-95"
+                className="col-span-3 min-h-12 rounded-lg border border-error/30 bg-surface text-body font-bold text-error hover:bg-error hover:text-background transition-all active:scale-[0.98] shadow-sm"
               >
-                X
+                Clear
               </button>
             </div>
           </div>
         ) : (
           <ul className="flex flex-col gap-2">
             {items.map((item) => (
-              <li key={item.cartId} className="rounded border border-border bg-surface p-4 flex flex-col gap-2">
-                <p className="text-body font-semibold text-copy-primary">{item.name}</p>
+              <li key={item.cartId} className="rounded-xl border border-border/80 bg-surface p-4 flex flex-col gap-2 shadow-sm hover:border-accent/40 transition-colors">
+                <p className="text-body font-bold text-copy-primary tracking-tight">{item.name}</p>
                 <div className="flex items-center justify-between">
                   {/* Quantity controls [-] Qty [+] */}
                   <div className="flex items-center gap-2">
                     <button
                       type="button"
                       onClick={() => onQuantityChange(item.productId, item.quantity - 1)}
-                      className="flex h-8 w-8 items-center justify-center rounded border border-border bg-background text-body font-bold text-copy-primary hover:border-accent hover:bg-surface transition-all active:scale-95"
+                      className="flex h-8 w-8 items-center justify-center rounded-lg border border-border bg-background text-body font-bold text-copy-secondary hover:border-accent hover:text-accent hover:bg-surface transition-all active:scale-90 duration-155"
                       aria-label="Decrease quantity"
                     >
                       -
                     </button>
-                    <span className="text-body font-semibold w-6 text-center">{item.quantity}</span>
+                    <span className="text-body font-bold w-8 text-center text-copy-primary">{item.quantity}</span>
                     <button
                       type="button"
                       onClick={() => onQuantityChange(item.productId, item.quantity + 1)}
-                      className="flex h-8 w-8 items-center justify-center rounded border border-border bg-background text-body font-bold text-copy-primary hover:border-accent hover:bg-surface transition-all active:scale-95"
+                      className="flex h-8 w-8 items-center justify-center rounded-lg border border-border bg-background text-body font-bold text-copy-secondary hover:border-accent hover:text-accent hover:bg-surface transition-all active:scale-90 duration-155"
                       aria-label="Increase quantity"
                     >
                       +
                     </button>
                   </div>
-                  <span className="font-semibold text-copy-primary">
+                  <span className="font-bold text-copy-primary">
                     ₹{(item.price * item.quantity).toFixed(2)}
                   </span>
                 </div>
@@ -237,39 +239,39 @@ function CartPanel({ items, onQuantityChange }) {
       {items.length > 0 && (
         <footer className="mt-auto flex flex-col gap-4 border-t border-border p-4 bg-background">
           {/* Pricing Summary */}
-          <div className="flex flex-col gap-2 text-body">
+          <div className="flex flex-col gap-2 text-body bg-surface p-4 rounded-xl border border-border/80 shadow-sm">
             <div className="flex justify-between">
               <span className="text-copy-secondary">Subtotal</span>
-              <span className="font-semibold text-copy-primary">₹{subtotal.toFixed(2)}</span>
+              <span className="font-bold text-copy-primary">₹{subtotal.toFixed(2)}</span>
             </div>
             <div className="flex justify-between">
               <span className="text-copy-secondary">GST (5%)</span>
-              <span className="font-semibold text-copy-primary">₹{gst.toFixed(2)}</span>
+              <span className="font-bold text-copy-primary">₹{gst.toFixed(2)}</span>
             </div>
             {discountApplied && (
-              <div className="flex justify-between text-success font-medium">
+              <div className="flex justify-between text-success font-bold animate-modal-in">
                 <span>Discount (20%)</span>
                 <span>-₹{discount.toFixed(2)}</span>
               </div>
             )}
             <div className="flex justify-between border-t border-dashed border-border pt-2 text-price">
               <span className="font-bold text-copy-primary">Total</span>
-              <span className="font-bold text-primary">₹{orderTotal.toFixed(2)}</span>
+              <span className="font-bold text-primary text-lg">₹{orderTotal.toFixed(2)}</span>
             </div>
           </div>
 
           {/* Selected Customer / Discount Badges */}
           <div className="flex flex-col gap-2">
             {selectedCustomer && (
-              <div className="flex items-center justify-between rounded border border-border bg-surface px-4 py-2 text-label text-copy-primary animate-modal-in">
+              <div className="flex items-center justify-between rounded-xl border border-accent/20 bg-accent/5 px-4 py-2 text-label text-copy-primary animate-modal-in shadow-sm">
                 <div className="flex flex-col">
-                  <span className="font-semibold">{selectedCustomer.name}</span>
+                  <span className="font-bold text-accent">{selectedCustomer.name}</span>
                   <span className="text-caption text-copy-secondary">{selectedCustomer.phone}</span>
                 </div>
                 <button
                   type="button"
                   onClick={() => setSelectedCustomer(null)}
-                  className="text-copy-secondary hover:text-error text-body font-bold px-1"
+                  className="text-copy-secondary hover:text-error hover:bg-error/10 rounded-full h-6 w-6 flex items-center justify-center text-body font-bold transition-all duration-150 active:scale-90"
                   aria-label="Remove customer"
                 >
                   ×
@@ -278,12 +280,12 @@ function CartPanel({ items, onQuantityChange }) {
             )}
 
             {discountApplied && (
-              <div className="flex items-center justify-between rounded border border-success bg-surface px-4 py-2 text-label text-success animate-modal-in">
-                <span className="font-semibold">Coupon SUMMER20 Applied</span>
+              <div className="flex items-center justify-between rounded-xl border border-success/20 bg-success/5 px-4 py-2 text-label text-success animate-modal-in shadow-sm">
+                <span className="font-bold">Coupon SUMMER20 Applied</span>
                 <button
                   type="button"
                   onClick={() => setDiscountApplied(false)}
-                  className="text-copy-secondary hover:text-error text-body font-bold px-1"
+                  className="text-copy-secondary hover:text-error hover:bg-error/10 rounded-full h-6 w-6 flex items-center justify-center text-body font-bold transition-all duration-150 active:scale-90"
                   aria-label="Remove discount"
                 >
                   ×
@@ -297,21 +299,21 @@ function CartPanel({ items, onQuantityChange }) {
             <button
               type="button"
               onClick={() => setIsCustomerModalOpen(true)}
-              className="min-h-12 rounded border border-border bg-surface px-2 text-label font-semibold text-copy-primary hover:border-accent hover:bg-surface transition-colors"
+              className="min-h-12 rounded-lg border border-border bg-surface px-2 text-label font-bold text-copy-primary hover:border-accent/50 hover:bg-background hover:-translate-y-0.5 active:translate-y-0 transition-all duration-150 shadow-sm"
             >
               Customer
             </button>
             <button
               type="button"
               onClick={() => setIsCouponModalOpen(true)}
-              className="min-h-12 rounded border border-border bg-surface px-2 text-label font-semibold text-copy-primary hover:border-accent hover:bg-surface transition-colors"
+              className="min-h-12 rounded-lg border border-border bg-surface px-2 text-label font-bold text-copy-primary hover:border-accent/50 hover:bg-background hover:-translate-y-0.5 active:translate-y-0 transition-all duration-150 shadow-sm"
             >
               Discount
             </button>
             <button
               type="button"
               onClick={handleSend}
-              className="min-h-12 rounded bg-accent px-2 text-label font-semibold text-background hover:bg-accent/90 transition-colors"
+              className="min-h-12 rounded-lg bg-accent px-2 text-label font-bold text-background shadow-md shadow-accent/10 hover:bg-accent/90 hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0 transition-all duration-150"
             >
               Send
             </button>
@@ -322,10 +324,10 @@ function CartPanel({ items, onQuantityChange }) {
       {/* Customer Search Modal */}
       {isCustomerModalOpen ? (
         <div className="fixed inset-0 z-10 flex items-center justify-center bg-[rgba(15,23,42,0.4)] p-4">
-          <div className="w-full max-w-md rounded border border-border bg-background p-4 animate-modal-in shadow-lg">
-            <h2 className="text-section-title text-primary">Customer Search</h2>
+          <div className="w-full max-w-md rounded-xl border border-border bg-background p-4 animate-modal-in shadow-lg">
+            <h2 className="text-section-title font-bold text-primary tracking-tight">Customer Search</h2>
             <input
-              className="mt-4 min-h-12 w-full rounded border border-border px-4 text-body text-copy-primary bg-background outline-none focus:border-accent transition-all"
+              className="mt-4 min-h-12 w-full rounded-lg border border-border px-4 text-body text-copy-primary bg-background outline-none focus:border-accent focus:ring-2 focus:ring-accent/10 transition-all"
               placeholder="Search by name, email, or phone"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
@@ -345,10 +347,10 @@ function CartPanel({ items, onQuantityChange }) {
                           setSearchQuery('');
                           setIsCustomerModalOpen(false);
                         }}
-                        className="w-full rounded border border-border bg-surface p-4 text-left transition-all hover:border-accent hover:bg-background"
+                        className="w-full rounded-xl border border-border bg-surface p-4 text-left transition-all duration-150 hover:border-accent hover:shadow-sm hover:-translate-y-0.5 active:translate-y-0"
                       >
-                        <p className="text-body font-semibold text-copy-primary">{customer.name}</p>
-                        <p className="text-label text-copy-secondary">{customer.email}</p>
+                        <p className="text-body font-bold text-copy-primary">{customer.name}</p>
+                        <p className="text-label text-copy-secondary mt-1">{customer.email}</p>
                         <p className="text-label text-copy-secondary">{customer.phone}</p>
                       </button>
                     </li>
@@ -364,7 +366,7 @@ function CartPanel({ items, onQuantityChange }) {
                   setSearchQuery('');
                   setIsCustomerModalOpen(false);
                 }}
-                className="min-h-12 w-full rounded bg-surface text-body font-semibold text-copy-primary hover:bg-border/30 transition-colors"
+                className="min-h-12 w-full rounded-lg bg-surface border border-border text-body font-bold text-copy-primary hover:bg-border/30 active:scale-[0.98] transition-all duration-150 shadow-sm"
               >
                 Cancel
               </button>
@@ -376,10 +378,10 @@ function CartPanel({ items, onQuantityChange }) {
       {/* Coupon Modal */}
       {isCouponModalOpen ? (
         <div className="fixed inset-0 z-10 flex items-center justify-center bg-[rgba(15,23,42,0.4)] p-4">
-          <div className="w-full max-w-sm rounded border border-border bg-background p-4 animate-modal-in shadow-lg">
-            <h2 className="text-section-title text-primary">Apply Coupon</h2>
+          <div className="w-full max-w-sm rounded-xl border border-border bg-background p-4 animate-modal-in shadow-lg">
+            <h2 className="text-section-title font-bold text-primary tracking-tight">Apply Coupon</h2>
             <div className="mt-4 flex flex-col gap-1">
-              <label className="text-label font-semibold text-copy-primary" htmlFor="coupon-code">
+              <label className="text-label font-bold text-copy-primary" htmlFor="coupon-code">
                 Coupon Code
               </label>
               <input
@@ -389,8 +391,8 @@ function CartPanel({ items, onQuantityChange }) {
                   setCouponCode(event.target.value);
                   setCouponError('');
                 }}
-                className={`min-h-12 rounded border bg-background px-4 text-body outline-none focus:border-accent transition-all ${
-                  couponError ? 'border-error' : 'border-border'
+                className={`min-h-12 rounded-lg border bg-background px-4 text-body outline-none focus:border-accent focus:ring-2 focus:ring-accent/10 transition-all ${
+                  couponError ? 'border-error focus:ring-error/10' : 'border-border'
                 }`}
                 placeholder="Enter coupon code"
               />
@@ -400,7 +402,7 @@ function CartPanel({ items, onQuantityChange }) {
               <button
                 type="button"
                 onClick={handleApplyCoupon}
-                className="min-h-12 rounded bg-accent text-body font-semibold text-background hover:bg-accent/90 transition-colors"
+                className="min-h-12 rounded-lg bg-accent text-body font-bold text-background hover:bg-accent/90 shadow-md shadow-accent/10 active:scale-[0.98] transition-all duration-150"
               >
                 Apply
               </button>
@@ -411,7 +413,7 @@ function CartPanel({ items, onQuantityChange }) {
                   setCouponError('');
                   setCouponCode('');
                 }}
-                className="min-h-12 rounded bg-surface text-body font-semibold text-copy-primary hover:bg-border/30 transition-colors"
+                className="min-h-12 rounded-lg bg-surface border border-border text-body font-bold text-copy-primary hover:bg-border/30 active:scale-[0.98] transition-all duration-150 shadow-sm"
               >
                 Cancel
               </button>

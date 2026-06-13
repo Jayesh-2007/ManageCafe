@@ -31,17 +31,18 @@ function Navbar() {
   });
 
   return (
-    <nav className="border-r border-border bg-primary text-background" aria-label="Primary">
+    <nav className="w-full lg:w-[200px] border-r border-background/10 bg-primary text-background shrink-0 shadow-sm" aria-label="Primary">
       <ul className="flex flex-col gap-1 p-4">
         {visibleItems.map((item) => (
-          <li key={item.path}>
+          <li key={item.path} className="w-full">
             <NavLink
               to={item.path}
               className={({ isActive }) =>
-                [
-                  'block min-h-12 rounded px-4 py-2 text-body transition-colors',
-                  isActive ? 'bg-accent text-background' : 'hover:bg-accent',
-                ].join(' ')
+                `block min-h-12 rounded-lg px-4 py-2 text-body transition-all duration-150 active:scale-[0.97] ${
+                  isActive
+                    ? 'bg-accent text-background font-bold shadow-md shadow-accent/20'
+                    : 'text-background/80 hover:bg-background/10 hover:text-background'
+                }`
               }
             >
               {item.label}

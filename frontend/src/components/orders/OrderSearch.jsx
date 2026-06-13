@@ -22,7 +22,7 @@ function OrderSearch({ value, onChange }) {
         placeholder="Search by customer, order number, or date..."
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="w-full min-h-12 rounded border border-border bg-background pl-12 pr-4 text-body text-copy-primary outline-none focus:border-accent transition-all"
+        className="w-full min-h-12 rounded-lg border border-border bg-surface pl-12 pr-4 text-body text-copy-primary outline-none focus:border-accent focus:ring-2 focus:ring-accent/10 transition-all shadow-sm"
       />
     </div>
   );

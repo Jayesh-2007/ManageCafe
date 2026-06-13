@@ -1,8 +1,8 @@
 function CategorySidebar({ categories, selectedCategory, onCategorySelect }) {
   return (
-    <aside className="flex w-full flex-col border-r border-border bg-primary text-background lg:w-[200px]">
-      <div className="border-b border-border p-4">
-        <p className="text-section-title">ManageCafe</p>
+    <aside className="flex w-full flex-col border-r border-background/10 bg-primary text-background lg:w-[200px] shrink-0 shadow-sm">
+      <div className="border-b border-background/10 p-4">
+        <p className="text-section-title font-bold tracking-tight text-background">ManageCafe</p>
       </div>
 
       <nav className="p-4" aria-label="Product categories">
@@ -10,14 +10,14 @@ function CategorySidebar({ categories, selectedCategory, onCategorySelect }) {
           {categories.map((category) => {
             const isSelected = category === selectedCategory;
             return (
-              <li key={category}>
+              <li key={category} className="lg:w-full">
                 <button
                   type="button"
                   onClick={() => onCategorySelect(category)}
-                  className={`min-h-12 w-full text-left whitespace-nowrap rounded px-4 py-2 text-body transition-colors ${
+                  className={`min-h-12 w-full text-left whitespace-nowrap rounded-lg px-4 py-2 text-body transition-all duration-150 active:scale-[0.97] ${
                     isSelected
-                      ? 'bg-accent text-background font-semibold'
-                      : 'text-background hover:bg-accent/20'
+                      ? 'bg-accent text-background font-bold shadow-md shadow-accent/20'
+                      : 'text-background/80 hover:bg-background/10 hover:text-background'
                   }`}
                 >
                   {category}
