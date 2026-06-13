@@ -168,3 +168,25 @@ Create or update body:
   "description": "Hot tea"
 }
 ```
+
+## Customers
+
+All customer routes require a JWT. Admin and employee users are both allowed.
+
+```http
+GET    /api/customers?page=1&limit=20&search=jayesh
+GET    /api/customers/:id
+POST   /api/customers
+PUT    /api/customers/:id
+DELETE /api/customers/:id
+```
+
+Create or update body:
+
+```json
+{
+  "name": "Jayesh Hadiyal",
+  "email": "jayesh@example.com",
+  "phone": "9876543210"
+}
+```
