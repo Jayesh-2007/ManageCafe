@@ -89,14 +89,14 @@ function SignUp() {
   }
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-background px-4 py-8">
-      <section className="w-full max-w-md rounded border border-border bg-surface p-6">
-        <h1 className="text-page-title text-primary">Sign Up</h1>
+    <main className="flex min-h-screen items-center justify-center bg-background px-4 py-12">
+      <section className="w-full max-w-md rounded-xl border border-border bg-surface p-8 shadow-sm hover:shadow-md transition-shadow duration-200">
+        <h1 className="text-page-title text-primary font-bold">Sign Up</h1>
         <form className="mt-6 flex flex-col gap-4" noValidate onSubmit={handleSubmit}>
           {banner ? <Toast message={banner} type="error" /> : null}
 
           <div className="flex flex-col gap-1">
-            <label className="text-label text-copy-primary" htmlFor="name">
+            <label className="text-label font-bold text-copy-primary" htmlFor="name">
               Name
             </label>
             <input
@@ -107,15 +107,15 @@ function SignUp() {
               value={values.name}
               onChange={updateField}
               aria-describedby={errors.name ? 'name-error' : undefined}
-              className={`min-h-12 rounded border bg-background px-4 text-body text-copy-primary outline-none focus:border-accent ${
-                errors.name ? 'border-error' : 'border-border'
+              className={`min-h-12 rounded-lg border bg-background px-4 text-body text-copy-primary outline-none focus:border-accent focus:ring-2 focus:ring-accent/10 transition-all ${
+                errors.name ? 'border-error focus:ring-error/10' : 'border-border'
               }`}
             />
             <ErrorMessage id="name-error" message={errors.name} />
           </div>
 
           <div className="flex flex-col gap-1">
-            <label className="text-label text-copy-primary" htmlFor="email">
+            <label className="text-label font-bold text-copy-primary" htmlFor="email">
               Email
             </label>
             <input
@@ -126,15 +126,15 @@ function SignUp() {
               value={values.email}
               onChange={updateField}
               aria-describedby={errors.email ? 'email-error' : undefined}
-              className={`min-h-12 rounded border bg-background px-4 text-body text-copy-primary outline-none focus:border-accent ${
-                errors.email ? 'border-error' : 'border-border'
+              className={`min-h-12 rounded-lg border bg-background px-4 text-body text-copy-primary outline-none focus:border-accent focus:ring-2 focus:ring-accent/10 transition-all ${
+                errors.email ? 'border-error focus:ring-error/10' : 'border-border'
               }`}
             />
             <ErrorMessage id="email-error" message={errors.email} />
           </div>
 
           <div className="flex flex-col gap-1">
-            <label className="text-label text-copy-primary" htmlFor="password">
+            <label className="text-label font-bold text-copy-primary" htmlFor="password">
               Password
             </label>
             <input
@@ -145,8 +145,8 @@ function SignUp() {
               value={values.password}
               onChange={updateField}
               aria-describedby={errors.password ? 'password-error' : undefined}
-              className={`min-h-12 rounded border bg-background px-4 text-body text-copy-primary outline-none focus:border-accent ${
-                errors.password ? 'border-error' : 'border-border'
+              className={`min-h-12 rounded-lg border bg-background px-4 text-body text-copy-primary outline-none focus:border-accent focus:ring-2 focus:ring-accent/10 transition-all ${
+                errors.password ? 'border-error focus:ring-error/10' : 'border-border'
               }`}
             />
             <ErrorMessage id="password-error" message={errors.password} />
@@ -155,7 +155,7 @@ function SignUp() {
           <button
             type="submit"
             disabled={isLoading}
-            className="flex min-h-12 items-center justify-center gap-2 rounded bg-accent px-4 text-body font-semibold text-background disabled:cursor-not-allowed disabled:opacity-70"
+            className="flex min-h-12 items-center justify-center gap-2 rounded-lg bg-accent px-4 text-body font-bold text-background shadow-md shadow-accent/10 hover:bg-accent/90 hover:shadow-lg hover:shadow-accent/20 hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98] transition-all duration-150 disabled:cursor-not-allowed disabled:opacity-70"
           >
             {isLoading ? <LoadingSpinner label="Creating account" /> : null}
             Create account

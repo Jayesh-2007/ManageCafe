@@ -13,20 +13,20 @@ function OrderRow({ order, isSelected, onClick }) {
   return (
     <tr
       onClick={() => onClick(order)}
-      className={`cursor-pointer border-b border-border transition-colors hover:bg-surface/40 ${
-        isSelected ? 'bg-surface font-semibold' : ''
+      className={`cursor-pointer border-b border-border/60 transition-all duration-150 hover:bg-surface/60 ${
+        isSelected ? 'bg-accent/5 text-accent' : ''
       }`}
     >
-      <td className="px-4 py-4 text-body text-copy-primary whitespace-nowrap">
+      <td className={`px-4 py-4 text-body whitespace-nowrap transition-colors ${isSelected ? 'font-bold text-accent' : 'text-copy-primary'}`}>
         {formattedDate}
       </td>
-      <td className="px-4 py-4 text-body text-primary font-semibold whitespace-nowrap">
+      <td className={`px-4 py-4 text-body font-bold whitespace-nowrap transition-colors ${isSelected ? 'text-accent' : 'text-primary'}`}>
         {order.orderNumber}
       </td>
-      <td className="px-4 py-4 text-body text-copy-primary whitespace-nowrap">
+      <td className={`px-4 py-4 text-body whitespace-nowrap transition-colors ${isSelected ? 'font-bold text-accent' : 'text-copy-primary'}`}>
         {order.customer.name}
       </td>
-      <td className="px-4 py-4 text-body text-copy-primary font-semibold whitespace-nowrap">
+      <td className={`px-4 py-4 text-body font-bold whitespace-nowrap transition-colors ${isSelected ? 'text-accent' : 'text-copy-primary'}`}>
         ₹{order.amount.toFixed(2)}
       </td>
       <td className="px-4 py-4 text-body whitespace-nowrap">
