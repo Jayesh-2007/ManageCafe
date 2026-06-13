@@ -5,7 +5,12 @@
   "main": "server.js",
   "scripts": {
     "dev": "nodemon server.js",
+<<<<<<< HEAD
     "start": "node server.js"
+=======
+    "start": "node server.js",
+    "db:migrate": "node database/migrate.js"
+>>>>>>> main
   },
   "keywords": [],
   "author": "",

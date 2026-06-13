@@ -40,6 +40,31 @@ npm start
 
 The server defaults to port `5000` unless `PORT` is set in the environment.
 
+<<<<<<< HEAD
+=======
+## Database
+
+The migration script creates the configured MySQL database if it does not already exist, runs `database/schema.sql`, and then runs `database/seed.sql`.
+
+Before running migrations, make sure `.env` contains valid MySQL settings:
+
+```env
+DB_HOST=localhost
+DB_USER=root
+DB_PASS=
+DB_NAME=cafe_pos
+DB_PORT=3306
+```
+
+Run the migration and seed data:
+
+```bash
+npm run db:migrate
+```
+
+This will create the database tables and insert the initial admin user, product categories, starter products, payment methods, and cafe tables.
+
+>>>>>>> main
 ## Health Check
 
 ```http
