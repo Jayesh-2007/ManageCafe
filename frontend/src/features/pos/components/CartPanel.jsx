@@ -3,7 +3,7 @@ import ErrorMessage from '../../../components/common/ErrorMessage';
 import Toast from '../../../components/common/Toast';
 import EmptyCartState from './EmptyCartState';
 
-const tabs = ['Product', 'Cart', 'Payment'];
+const tabs = ['Cart', 'Payment'];
 const customers = [
   { id: 'cust-1', name: 'Aarav Patel', email: 'aarav@example.com', phone: '9876543210' },
   { id: 'cust-2', name: 'Priya Sharma', email: 'priya@example.com', phone: '9876501234' },
