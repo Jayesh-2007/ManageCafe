@@ -264,3 +264,41 @@ GET /api/reports/top-products?startDate=2026-01-01&endDate=2026-12-31
 GET /api/reports/top-categories?startDate=2026-01-01&endDate=2026-12-31
 GET /api/reports/export?format=csv&startDate=2026-01-01&endDate=2026-12-31
 ```
+
+## Promotions
+
+Promotion reads require a JWT. Create, update, and delete require an admin JWT.
+
+```http
+GET    /api/promotions
+GET    /api/promotions/:id
+POST   /api/promotions
+PUT    /api/promotions/:id
+DELETE /api/promotions/:id
+POST   /api/promotions/validate
+```
+
+Coupon validation body:
+
+```json
+{
+  "coupon_code": "SUMMER20",
+  "subtotal": 1000
+}
+```
+
+Orders may include an optional coupon code:
+
+```json
+{
+  "customer_id": 1,
+  "table_id": 3,
+  "coupon_code": "SUMMER20",
+  "items": [
+    {
+      "product_id": 1,
+      "quantity": 2
+    }
+  ]
+}
+```
