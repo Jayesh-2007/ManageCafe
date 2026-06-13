@@ -190,3 +190,44 @@ Create or update body:
   "phone": "9876543210"
 }
 ```
+
+## Orders
+
+All order routes require a JWT. Orders start as `draft` and can be marked `paid`.
+
+```http
+GET    /api/orders?page=1&limit=20&search=ORD&status=draft
+GET    /api/orders/:id
+POST   /api/orders
+PUT    /api/orders/:id
+DELETE /api/orders/:id
+POST   /api/orders/:id/send-to-kitchen
+POST   /api/orders/:id/pay
+```
+
+Create or update draft order body:
+
+```json
+{
+  "customer_id": 1,
+  "table_id": 3,
+  "items": [
+    {
+      "product_id": 1,
+      "quantity": 2
+    },
+    {
+      "product_id": 2,
+      "quantity": 1
+    }
+  ]
+}
+```
+
+Pay order body:
+
+```json
+{
+  "payment_method_id": 1
+}
+```
