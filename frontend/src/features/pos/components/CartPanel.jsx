@@ -11,7 +11,7 @@ const customers = [
 ];
 const amountError = 'Amount cannot be less than the order total';
 
-function CartPanel({ items }) {
+function CartPanel({ items, onQuantityChange }) {
   const [activeTab, setActiveTab] = useState('Cart');
   const [isCustomerModalOpen, setIsCustomerModalOpen] = useState(false);
   const [isCouponModalOpen, setIsCouponModalOpen] = useState(false);
@@ -27,9 +27,10 @@ function CartPanel({ items }) {
   const [showPaymentErrors, setShowPaymentErrors] = useState(false);
 
   // Calculations
-  const cartTotal = items.reduce((total, item) => total + item.price * (item.quantity || 1), 0);
-  const discount = discountApplied ? Math.round(cartTotal * 0.2 * 100) / 100 : 0;
-  const orderTotal = Math.max(0, cartTotal - discount);
+  const subtotal = items.reduce((total, item) => total + item.price * (item.quantity || 1), 0);
+  const gst = Math.round(subtotal * 0.05 * 100) / 100;
+  const discount = discountApplied ? Math.round(subtotal * 0.2 * 100) / 100 : 0;
+  const orderTotal = Math.max(0, subtotal + gst - discount);
 
   const parsedAmount = parseFloat(amount) || 0;
   const isAmountInvalid = (amount !== '' || showPaymentErrors) && parsedAmount < orderTotal;
@@ -199,11 +200,32 @@ function CartPanel({ items }) {
         ) : (
           <ul className="flex flex-col gap-2">
             {items.map((item) => (
-              <li key={item.cartId} className="rounded border border-border bg-surface p-4">
+              <li key={item.cartId} className="rounded border border-border bg-surface p-4 flex flex-col gap-2">
                 <p className="text-body font-semibold text-copy-primary">{item.name}</p>
-                <div className="mt-1 flex justify-between text-label text-copy-secondary">
-                  <span>Qty: {item.quantity || 1}</span>
-                  <span className="font-semibold text-copy-primary">₹{(item.price * (item.quantity || 1)).toFixed(2)}</span>
+                <div className="flex items-center justify-between">
+                  {/* Quantity controls [-] Qty [+] */}
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => onQuantityChange(item.productId, item.quantity - 1)}
+                      className="flex h-8 w-8 items-center justify-center rounded border border-border bg-background text-body font-bold text-copy-primary hover:border-accent hover:bg-surface transition-all active:scale-95"
+                      aria-label="Decrease quantity"
+                    >
+                      -
+                    </button>
+                    <span className="text-body font-semibold w-6 text-center">{item.quantity}</span>
+                    <button
+                      type="button"
+                      onClick={() => onQuantityChange(item.productId, item.quantity + 1)}
+                      className="flex h-8 w-8 items-center justify-center rounded border border-border bg-background text-body font-bold text-copy-primary hover:border-accent hover:bg-surface transition-all active:scale-95"
+                      aria-label="Increase quantity"
+                    >
+                      +
+                    </button>
+                  </div>
+                  <span className="font-semibold text-copy-primary">
+                    ₹{(item.price * item.quantity).toFixed(2)}
+                  </span>
                 </div>
               </li>
             ))}
@@ -218,7 +240,11 @@ function CartPanel({ items }) {
           <div className="flex flex-col gap-2 text-body">
             <div className="flex justify-between">
               <span className="text-copy-secondary">Subtotal</span>
-              <span className="font-semibold text-copy-primary">₹{cartTotal.toFixed(2)}</span>
+              <span className="font-semibold text-copy-primary">₹{subtotal.toFixed(2)}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-copy-secondary">GST (5%)</span>
+              <span className="font-semibold text-copy-primary">₹{gst.toFixed(2)}</span>
             </div>
             {discountApplied && (
               <div className="flex justify-between text-success font-medium">

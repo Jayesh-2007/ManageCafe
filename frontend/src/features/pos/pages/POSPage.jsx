@@ -21,16 +21,40 @@ function POSPage() {
   const [selectedCategory, setSelectedCategory] = useState('Chaat');
 
   function addProductToCart(product) {
-    setCartItems((currentItems) => [
-      ...currentItems,
-      {
-        cartId: `${product.id}-${currentItems.length}`,
-        productId: product.id,
-        name: product.name,
-        price: product.price,
-        quantity: 1,
-      },
-    ]);
+    setCartItems((currentItems) => {
+      const existingItemIndex = currentItems.findIndex((item) => item.productId === product.id);
+
+      if (existingItemIndex > -1) {
+        const updatedItems = [...currentItems];
+        updatedItems[existingItemIndex] = {
+          ...updatedItems[existingItemIndex],
+          quantity: updatedItems[existingItemIndex].quantity + 1,
+        };
+        return updatedItems;
+      } else {
+        return [
+          ...currentItems,
+          {
+            cartId: `${product.id}-${currentItems.length}`,
+            productId: product.id,
+            name: product.name,
+            price: product.price,
+            quantity: 1,
+          },
+        ];
+      }
+    });
+  }
+
+  function updateCartItemQuantity(productId, quantity) {
+    setCartItems((currentItems) => {
+      if (quantity <= 0) {
+        return currentItems.filter((item) => item.productId !== productId);
+      }
+      return currentItems.map((item) =>
+        item.productId === productId ? { ...item, quantity } : item
+      );
+    });
   }
 
   const filteredProducts = products.filter((product) => product.category === selectedCategory);
@@ -43,7 +67,7 @@ function POSPage() {
         onCategorySelect={setSelectedCategory}
       />
       <ProductGrid products={filteredProducts} onProductSelect={addProductToCart} />
-      <CartPanel items={cartItems} />
+      <CartPanel items={cartItems} onQuantityChange={updateCartItemQuantity} />
     </main>
   );
 }
