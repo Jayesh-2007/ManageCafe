@@ -5,6 +5,7 @@ require('dotenv').config();
 const authRoutes = require('./routes/authRoutes');
 const categoryRoutes = require('./routes/categoryRoutes');
 const customerRoutes = require('./routes/customerRoutes');
+const kdsRoutes = require('./routes/kdsRoutes');
 const orderRoutes = require('./routes/orderRoutes');
 const productRoutes = require('./routes/productRoutes');
 
@@ -16,6 +17,7 @@ app.use(express.json());
 app.use('/api/auth', authRoutes);
 app.use('/api/categories', categoryRoutes);
 app.use('/api/customers', customerRoutes);
+app.use('/api/kds', kdsRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/products', productRoutes);
 

@@ -231,3 +231,24 @@ Pay order body:
   "payment_method_id": 1
 }
 ```
+
+## Kitchen Display System
+
+All KDS routes require a JWT. Completed kitchen orders older than 24 hours are excluded from the main KDS list.
+
+```http
+GET /api/kds
+GET /api/kds?kds_status=to_cook
+GET /api/kds?q=tea
+GET /api/kds/stats
+GET /api/kds/:id
+PUT /api/kds/:id/status
+```
+
+Update KDS status body:
+
+```json
+{
+  "kds_status": "preparing"
+}
+```
