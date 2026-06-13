@@ -17,7 +17,7 @@ export default function DeleteOrderDialog({ isOpen, onClose, onConfirm, order })
         </p>
         <p className="text-sm text-gray-500">
           Customer: {order.customer?.name || 'Walk-in'} <br/>
-          Total: ${(order.total || 0).toFixed(2)}
+          Total: ${Number(order.total || 0).toFixed(2)}
         </p>
         <p className="text-red-500 text-sm font-medium">This action cannot be undone.</p>
         

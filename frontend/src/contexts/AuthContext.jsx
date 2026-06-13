@@ -1,6 +1,6 @@
 /* eslint-disable react-refresh/only-export-components */
 import { createContext, useState, useEffect, useContext, useCallback } from 'react';
-import api from '../services/api';
+import { authService } from '../services/authService';
 
 const AuthContext = createContext(null);
 
@@ -33,8 +33,8 @@ export const AuthProvider = ({ children }) => {
       return null;
     }
     try {
-      const response = await api.get('/auth/me');
-      const user = response.data.user;
+      const response = await authService.getMe();
+      const user = response.user || response;
       setCurrentUser(user);
       setRole(user.role);
       localStorage.setItem('user', JSON.stringify(user));
@@ -61,8 +61,8 @@ export const AuthProvider = ({ children }) => {
   }, [refreshUser]);
 
   const login = async (credentials) => {
-    const response = await api.post('/auth/login', credentials);
-    const { token: newToken, user } = response.data;
+    const response = await authService.login(credentials);
+    const { token: newToken, user } = response;
     
     localStorage.setItem('token', newToken);
     localStorage.setItem('user', JSON.stringify(user));
@@ -75,8 +75,8 @@ export const AuthProvider = ({ children }) => {
   };
 
   const register = async (userData) => {
-    const response = await api.post('/auth/register', userData);
-    return response.data;
+    const response = await authService.register(userData);
+    return response;
   };
 
   const logout = () => {

@@ -63,13 +63,13 @@ export default function OrderDetailsModal({ orderId, isOpen, onClose }) {
           </div>
 
           <div className="border-t pt-4 space-y-1 text-sm text-gray-600">
-            <div className="flex justify-between"><span>Subtotal</span><span>${(order.subtotal || 0).toFixed(2)}</span></div>
-            <div className="flex justify-between"><span>Tax</span><span>${(order.tax_total || 0).toFixed(2)}</span></div>
+            <div className="flex justify-between"><span>Subtotal</span><span>${Number(order.subtotal || 0).toFixed(2)}</span></div>
+            <div className="flex justify-between"><span>Tax</span><span>${Number(order.tax_total || 0).toFixed(2)}</span></div>
             {(order.discount_total > 0) && (
-              <div className="flex justify-between text-green-600"><span>Discount</span><span>-${(order.discount_total || 0).toFixed(2)}</span></div>
+              <div className="flex justify-between text-green-600"><span>Discount</span><span>-${Number(order.discount_total || 0).toFixed(2)}</span></div>
             )}
             <div className="flex justify-between font-bold text-gray-900 text-lg pt-2 border-t">
-              <span>Total</span><span>${(order.total || 0).toFixed(2)}</span>
+              <span>Total</span><span>${Number(order.total || 0).toFixed(2)}</span>
             </div>
           </div>
         </div>

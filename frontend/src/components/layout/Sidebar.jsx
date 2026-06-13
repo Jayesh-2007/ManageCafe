@@ -72,11 +72,15 @@ export default function Sidebar() {
                 `}
                 title={isSidebarCollapsed ? item.name : ''}
               >
-                <Icon size={20} strokeWidth={2.2} className={({ isActive }) => `
-                  flex-shrink-0 transition-colors
-                  ${isActive ? 'text-primary-600' : 'text-gray-400 group-hover:text-gray-600'}
-                `} />
-                {!isSidebarCollapsed && <span>{item.name}</span>}
+                {({ isActive }) => (
+                  <>
+                    <Icon size={20} strokeWidth={2.2} className={`
+                      flex-shrink-0 transition-colors
+                      ${isActive ? 'text-primary-600' : 'text-gray-400 group-hover:text-gray-600'}
+                    `} />
+                    {!isSidebarCollapsed && <span>{item.name}</span>}
+                  </>
+                )}
               </NavLink>
             );
           })}

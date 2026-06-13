@@ -52,7 +52,7 @@ export default function OrdersTable({
               <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">#{order.id}</td>
               <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{new Date(order.created_at).toLocaleDateString()}</td>
               <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{order.customer?.name || 'Walk-in'}</td>
-              <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${(order.total || 0).toFixed(2)}</td>
+              <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${Number(order.total || 0).toFixed(2)}</td>
               <td className="px-6 py-4 whitespace-nowrap text-sm"><OrderStatusBadge status={order.status} type="order" /></td>
               <td className="px-6 py-4 whitespace-nowrap text-sm"><OrderStatusBadge status={order.kds_status} type="kds" /></td>
               <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">

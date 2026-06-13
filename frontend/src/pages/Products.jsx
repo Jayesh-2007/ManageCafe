@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import useCrud from '../hooks/useCrud';
-import api from '../services/api';
+import { categoryService } from '../services/categoryService';
 import DataTable from '../components/admin/DataTable';
 import SearchBar from '../components/admin/SearchBar';
 import Pagination from '../components/admin/Pagination';
@@ -22,7 +22,7 @@ export default function Products() {
   const [error, setError] = useState('');
 
   useEffect(() => {
-    api.get('/categories').then(res => setCategories(res.data.data || res.data || [])).catch(() => {});
+    categoryService.getAll().then(res => setCategories(res.data || [])).catch(() => {});
   }, []);
 
   const openCreate = () => {

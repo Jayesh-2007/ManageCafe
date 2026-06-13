@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import api from '../../services/api';
+import { customerService } from '../../services/customerService';
 import useDebounce from '../../hooks/useDebounce';
 import Modal from '../ui/Modal';
 import Input from '../ui/Input';
@@ -21,8 +21,8 @@ export default function CustomerModal({ isOpen, onClose, onSelect }) {
     const fetchCustomers = async () => {
       setLoading(true);
       try {
-        const res = await api.get('/customers', { params: { search: debouncedSearch, limit: 5 } });
-        setCustomers(res.data.data || res.data || []);
+        const res = await customerService.getAll({ search: debouncedSearch, limit: 5 });
+        setCustomers(res.data || []);
       } catch {
         console.error('Failed to fetch customers');
       } finally {
@@ -40,8 +40,8 @@ export default function CustomerModal({ isOpen, onClose, onSelect }) {
     
     setFormError('');
     try {
-      const res = await api.post('/customers', formData);
-      onSelect(res.data.customer || res.data);
+      const res = await customerService.create(formData);
+      onSelect(res.customer || res.data || res);
       onClose();
     } catch (error) {
       setFormError(error.response?.data?.message || 'Failed to create customer');

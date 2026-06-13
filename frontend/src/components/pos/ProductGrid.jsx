@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import api from '../../services/api';
+import { productService } from '../../services/productService';
 import useDebounce from '../../hooks/useDebounce';
 import { Plus } from 'lucide-react';
 
@@ -16,9 +16,8 @@ export default function ProductGrid({ categoryId, searchQuery, onAddProduct }) {
         if (categoryId) params.category_id = categoryId;
         if (debouncedSearch) params.search = debouncedSearch;
         
-        const res = await api.get('/products', { params });
-        // Assume standard pagination or direct array
-        setProducts(res.data.data || res.data || []);
+        const res = await productService.getAll(params);
+        setProducts(res.data || []);
       } catch (error) {
         console.error('Failed to fetch products:', error);
       } finally {
@@ -70,7 +69,7 @@ export default function ProductGrid({ categoryId, searchQuery, onAddProduct }) {
           <div className="p-3 flex-1 flex flex-col">
             <h3 className="text-sm font-semibold text-gray-900 line-clamp-2 mb-1">{product.name}</h3>
             <div className="mt-auto flex items-center justify-between">
-              <span className="text-primary-700 font-bold">${(product.price).toFixed(2)}</span>
+              <span className="text-primary-700 font-bold">${Number(product.price).toFixed(2)}</span>
               {product.tax_rate > 0 && (
                 <span className="text-[10px] text-gray-400">+{product.tax_rate}% Tax</span>
               )}

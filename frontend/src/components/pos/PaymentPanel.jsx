@@ -44,7 +44,7 @@ export default function PaymentPanel({ orderId, orderTotal, isOpen, onClose, onS
       <div className="space-y-6">
         <div className="bg-gray-50 p-4 rounded-lg flex justify-between items-center text-lg font-bold border">
           <span>Amount Due:</span>
-          <span>${(orderTotal || 0).toFixed(2)}</span>
+          <span>${Number(orderTotal || 0).toFixed(2)}</span>
         </div>
 
         <div className="grid grid-cols-2 gap-4">

@@ -36,7 +36,7 @@ export default function SalesTrendChart({ data, loading }) {
             <YAxis axisLine={false} tickLine={false} tick={{fill: '#6B7280', fontSize: 12}} tickFormatter={(val) => `$${val}`} dx={-10} />
             <Tooltip 
               contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
-              formatter={(value) => [`$${value.toFixed(2)}`, 'Revenue']}
+              formatter={(value) => [`$${Number(value).toFixed(2)}`, 'Revenue']}
             />
             <Area type="monotone" dataKey="revenue" stroke="#4F46E5" strokeWidth={3} fillOpacity={1} fill="url(#colorRevenue)" />
           </AreaChart>

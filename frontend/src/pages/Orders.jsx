@@ -68,7 +68,7 @@ export default function Orders() {
           <div key={order.id} className="bg-white p-4 rounded-lg border shadow-sm flex flex-col gap-3">
             <div className="flex justify-between items-start">
               <span className="font-bold text-gray-900">#{order.id}</span>
-              <span className="font-bold text-gray-900">${(order.total || 0).toFixed(2)}</span>
+              <span className="font-bold text-gray-900">${Number(order.total || 0).toFixed(2)}</span>
             </div>
             <div className="text-sm text-gray-500">{order.customer?.name || 'Walk-in'}</div>
             <div className="flex gap-2">

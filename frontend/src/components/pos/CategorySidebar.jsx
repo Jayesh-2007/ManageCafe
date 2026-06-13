@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import api from '../../services/api';
+import { categoryService } from '../../services/categoryService';
 import { LayoutGrid } from 'lucide-react';
 
 export default function CategorySidebar({ activeCategoryId, onSelectCategory }) {
@@ -9,8 +9,8 @@ export default function CategorySidebar({ activeCategoryId, onSelectCategory }) 
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const res = await api.get('/categories');
-        setCategories(res.data.data || res.data || []);
+        const res = await categoryService.getAll();
+        setCategories(res.data || []);
       } catch (error) {
         console.error('Failed to fetch categories:', error);
       } finally {

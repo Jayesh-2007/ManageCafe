@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import api from '../../services/api';
+import { promotionService } from '../../services/promotionService';
 import Button from '../ui/Button';
 
 export default function CouponInput({ onApply, appliedCoupon, onRemove }) {
@@ -12,8 +12,8 @@ export default function CouponInput({ onApply, appliedCoupon, onRemove }) {
     setLoading(true);
     setError('');
     try {
-      const res = await api.post('/promotions/validate', { code });
-      onApply(res.data.promotion || res.data);
+      const res = await promotionService.validate(code);
+      onApply(res.promotion || res.data || res);
       setCode('');
     } catch (err) {
       setError(err.response?.data?.message || 'Invalid coupon code');

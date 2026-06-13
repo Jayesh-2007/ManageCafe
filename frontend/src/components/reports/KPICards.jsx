@@ -2,9 +2,9 @@ import { DollarSign, ShoppingBag, TrendingUp, Users } from 'lucide-react';
 
 export default function KPICards({ summary, loading }) {
   const cards = [
-    { label: 'Total Revenue', value: `$${(summary?.total_revenue || 0).toFixed(2)}`, icon: DollarSign, color: 'text-green-600', bg: 'bg-green-100' },
+    { label: 'Total Revenue', value: `$${Number(summary?.total_revenue || 0).toFixed(2)}`, icon: DollarSign, color: 'text-green-600', bg: 'bg-green-100' },
     { label: 'Total Orders', value: summary?.total_orders || 0, icon: ShoppingBag, color: 'text-blue-600', bg: 'bg-blue-100' },
-    { label: 'Avg Order Value', value: `$${(summary?.average_order_value || 0).toFixed(2)}`, icon: TrendingUp, color: 'text-purple-600', bg: 'bg-purple-100' },
+    { label: 'Avg Order Value', value: `$${Number(summary?.average_order_value || 0).toFixed(2)}`, icon: TrendingUp, color: 'text-purple-600', bg: 'bg-purple-100' },
     { label: 'Total Customers', value: summary?.total_customers || 0, icon: Users, color: 'text-orange-600', bg: 'bg-orange-100' },
   ];
 

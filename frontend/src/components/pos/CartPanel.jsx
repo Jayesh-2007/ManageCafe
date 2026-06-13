@@ -36,11 +36,11 @@ export default function CartPanel({ cart }) {
         res = await orderService.updateOrder(orderId, payload);
       } else {
         res = await orderService.createOrder(payload);
-        setOrderId(res.order?.id || res.id);
+        setOrderId(res.data?.id || res.order?.id || res.id);
       }
       
       // Store real backend response totals
-      const savedOrder = res.order || res;
+      const savedOrder = res.data || res.order || res;
       setBackendTotals({
         subtotal: savedOrder.subtotal,
         tax_total: savedOrder.tax_total,
@@ -132,7 +132,7 @@ export default function CartPanel({ cart }) {
             <div key={item.product_id} className="flex gap-3 bg-white p-3 rounded-lg border border-gray-100 shadow-sm">
               <div className="flex-1 min-w-0">
                 <h4 className="text-sm font-medium text-gray-900 truncate">{item.name}</h4>
-                <p className="text-xs text-gray-500 font-medium mt-1">${(item.price).toFixed(2)}</p>
+                <p className="text-xs text-gray-500 font-medium mt-1">${Number(item.price).toFixed(2)}</p>
               </div>
               
               <div className="flex flex-col items-end justify-between gap-2">
@@ -155,11 +155,11 @@ export default function CartPanel({ cart }) {
         <CouponInput onApply={setCoupon} appliedCoupon={coupon} onRemove={() => setCoupon(null)} />
         
         <div className="space-y-2 text-sm text-gray-600">
-          <div className="flex justify-between"><span>Subtotal</span><span>${(displaySubtotal).toFixed(2)}</span></div>
-          {displayDiscount > 0 && <div className="flex justify-between text-green-600"><span>Discount</span><span>-${(displayDiscount).toFixed(2)}</span></div>}
-          <div className="flex justify-between"><span>Tax</span><span>${(displayTax).toFixed(2)}</span></div>
+          <div className="flex justify-between"><span>Subtotal</span><span>${Number(displaySubtotal).toFixed(2)}</span></div>
+          {displayDiscount > 0 && <div className="flex justify-between text-green-600"><span>Discount</span><span>-${Number(displayDiscount).toFixed(2)}</span></div>}
+          <div className="flex justify-between"><span>Tax</span><span>${Number(displayTax).toFixed(2)}</span></div>
           <div className="flex justify-between font-bold text-gray-900 text-lg pt-2 border-t border-gray-200">
-            <span>Total</span><span>${(Math.max(0, displayTotal)).toFixed(2)}</span>
+            <span>Total</span><span>${Number(Math.max(0, displayTotal)).toFixed(2)}</span>
           </div>
         </div>
 

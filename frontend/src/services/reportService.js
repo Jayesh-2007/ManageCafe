@@ -1,28 +1,28 @@
-import api from './api';
+import apiClient, { handleApiResponse } from './apiClient';
 
 export const reportService = {
   getSummary: async (params) => {
-    const response = await api.get('/reports/summary', { params });
-    return response.data;
+    const response = await apiClient.get('/reports/summary', { params });
+    return handleApiResponse(response);
   },
   
   getSalesTrend: async (params) => {
-    const response = await api.get('/reports/sales-trend', { params });
-    return response.data;
+    const response = await apiClient.get('/reports/sales-trend', { params });
+    return handleApiResponse(response);
   },
 
   getTopProducts: async (params) => {
-    const response = await api.get('/reports/top-products', { params });
-    return response.data;
+    const response = await apiClient.get('/reports/top-products', { params });
+    return handleApiResponse(response);
   },
 
   getTopCategories: async (params) => {
-    const response = await api.get('/reports/top-categories', { params });
-    return response.data;
+    const response = await apiClient.get('/reports/top-categories', { params });
+    return handleApiResponse(response);
   },
 
   exportReport: async (params) => {
-    const response = await api.get('/reports/export', { 
+    const response = await apiClient.get('/reports/export', { 
       params,
       responseType: 'blob' 
     });

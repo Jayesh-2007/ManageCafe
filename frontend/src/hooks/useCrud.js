@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect } from 'react';
-import api from '../services/api';
+import apiClient from '../services/apiClient';
 import useDebounce from './useDebounce';
 
 export default function useCrud(endpoint, initialLimit = 20) {
@@ -16,10 +16,10 @@ export default function useCrud(endpoint, initialLimit = 20) {
     setLoading(true);
     try {
       const params = { page, limit: initialLimit, search: debouncedSearch, ...filters };
-      const res = await api.get(endpoint, { params });
+      const res = await apiClient.get(endpoint, { params });
       // Adaptive unpacking for different backend response formats
-      setData(res.data.data || res.data || []);
-      setTotal(res.data.total || 0);
+      setData(res.data?.data || res.data || []);
+      setTotal(res.data?.total || 0);
     } catch (error) {
       console.error(`Failed to fetch ${endpoint}`, error);
     } finally {
@@ -33,19 +33,19 @@ export default function useCrud(endpoint, initialLimit = 20) {
   }, [fetchData]);
 
   const createItem = async (payload) => {
-    const res = await api.post(endpoint, payload);
+    const res = await apiClient.post(endpoint, payload);
     await fetchData();
     return res.data;
   };
 
   const updateItem = async (id, payload) => {
-    const res = await api.put(`${endpoint}/${id}`, payload);
+    const res = await apiClient.put(`${endpoint}/${id}`, payload);
     await fetchData();
     return res.data;
   };
 
   const deleteItem = async (id) => {
-    const res = await api.delete(`${endpoint}/${id}`);
+    const res = await apiClient.delete(`${endpoint}/${id}`);
     await fetchData();
     return res.data;
   };
