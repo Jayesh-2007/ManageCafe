@@ -5,6 +5,17 @@ import AppLayout from './layouts/AppLayout';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
 
+// Placeholder Pages
+import POS from './pages/POS';
+import Orders from './pages/Orders';
+import KDS from './pages/KDS';
+import Customers from './pages/Customers';
+import Products from './pages/Products';
+import Categories from './pages/Categories';
+import Promotions from './pages/Promotions';
+import Users from './pages/Users';
+import Reports from './pages/Reports';
+
 function App() {
   return (
     <AuthProvider>
@@ -20,18 +31,18 @@ function App() {
           <Route element={<ProtectedRoute />}>
             <Route element={<AppLayout />}>
               <Route path="/" element={<Navigate to="/pos" replace />} />
-              <Route path="/pos" element={<div>POS Page</div>} />
-              <Route path="/orders" element={<div>Orders Page</div>} />
-              <Route path="/kds" element={<div>KDS Page</div>} />
-              <Route path="/customers" element={<div>Customers Page</div>} />
+              <Route path="/pos" element={<POS />} />
+              <Route path="/orders" element={<Orders />} />
+              <Route path="/kds" element={<KDS />} />
+              <Route path="/customers" element={<Customers />} />
               
               {/* Admin Only Routes */}
               <Route element={<ProtectedRoute requiredRole="admin" />}>
-                <Route path="/products" element={<div>Products Page</div>} />
-                <Route path="/categories" element={<div>Categories Page</div>} />
-                <Route path="/promotions" element={<div>Promotions Page</div>} />
-                <Route path="/users" element={<div>Users Page</div>} />
-                <Route path="/reports" element={<div>Reports Page</div>} />
+                <Route path="/products" element={<Products />} />
+                <Route path="/categories" element={<Categories />} />
+                <Route path="/promotions" element={<Promotions />} />
+                <Route path="/users" element={<Users />} />
+                <Route path="/reports" element={<Reports />} />
               </Route>
             </Route>
           </Route>
