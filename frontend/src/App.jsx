@@ -3,6 +3,7 @@ import { ProtectedRoute } from './hooks/useAuth.jsx';
 import POSPage from './features/pos/pages/POSPage';
 import Login from './pages/Login';
 import SignUp from './pages/SignUp';
+import Orders from './pages/Orders';
 
 const adminRoles = ['admin'];
 
@@ -19,7 +20,14 @@ function App() {
           </ProtectedRoute>
         }
       />
-      <Route path="/orders" element={<ProtectedRoute />} />
+      <Route
+        path="/orders"
+        element={
+          <ProtectedRoute>
+            <Orders />
+          </ProtectedRoute>
+        }
+      />
       <Route path="/products" element={<ProtectedRoute allowedRoles={adminRoles} />} />
       <Route path="/categories" element={<ProtectedRoute allowedRoles={adminRoles} />} />
       <Route path="/payment-methods" element={<ProtectedRoute allowedRoles={adminRoles} />} />
