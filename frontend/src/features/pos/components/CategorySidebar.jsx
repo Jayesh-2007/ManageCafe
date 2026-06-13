@@ -1,4 +1,4 @@
-function CategorySidebar({ categories }) {
+function CategorySidebar({ categories, selectedCategory, onCategorySelect }) {
   return (
     <aside className="flex w-full flex-col border-r border-border bg-primary text-background lg:w-[200px]">
       <div className="border-b border-border p-4">
@@ -7,17 +7,24 @@ function CategorySidebar({ categories }) {
 
       <nav className="p-4" aria-label="Product categories">
         <ul className="flex flex-row gap-2 overflow-x-auto lg:flex-col lg:overflow-visible">
-          {categories.map((category, index) => (
-            <li key={category}>
-              <div
-                className={`min-h-12 whitespace-nowrap rounded px-4 py-2 text-body ${
-                  index === 0 ? 'bg-accent text-background' : 'text-background'
-                }`}
-              >
-                {category}
-              </div>
-            </li>
-          ))}
+          {categories.map((category) => {
+            const isSelected = category === selectedCategory;
+            return (
+              <li key={category}>
+                <button
+                  type="button"
+                  onClick={() => onCategorySelect(category)}
+                  className={`min-h-12 w-full text-left whitespace-nowrap rounded px-4 py-2 text-body transition-colors ${
+                    isSelected
+                      ? 'bg-accent text-background font-semibold'
+                      : 'text-background hover:bg-accent/20'
+                  }`}
+                >
+                  {category}
+                </button>
+              </li>
+            );
+          })}
         </ul>
       </nav>
     </aside>
