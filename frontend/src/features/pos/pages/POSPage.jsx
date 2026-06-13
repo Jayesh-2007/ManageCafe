@@ -24,6 +24,7 @@ function POSPage() {
         cartId: `${product.id}-${currentItems.length}`,
         productId: product.id,
         name: product.name,
+        price: product.price,
         quantity: 1,
       },
     ]);
