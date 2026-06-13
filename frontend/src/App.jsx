@@ -15,6 +15,7 @@ import Categories from './pages/Categories';
 import Promotions from './pages/Promotions';
 import Users from './pages/Users';
 import Reports from './pages/Reports';
+import IntegrationTest from './pages/IntegrationTest';
 
 function App() {
   return (
@@ -43,6 +44,7 @@ function App() {
                 <Route path="/promotions" element={<Promotions />} />
                 <Route path="/users" element={<Users />} />
                 <Route path="/reports" element={<Reports />} />
+                <Route path="/integration-test" element={<IntegrationTest />} />
               </Route>
             </Route>
           </Route>
