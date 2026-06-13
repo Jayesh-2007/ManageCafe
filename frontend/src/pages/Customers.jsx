@@ -1,13 +1,95 @@
+import { useState } from 'react';
+import useCrud from '../hooks/useCrud';
+import DataTable from '../components/admin/DataTable';
+import SearchBar from '../components/admin/SearchBar';
+import Pagination from '../components/admin/Pagination';
+import FormModal from '../components/admin/FormModal';
+import DeleteConfirmDialog from '../components/admin/DeleteConfirmDialog';
+import Button from '../components/ui/Button';
+import Input from '../components/ui/Input';
+import { Plus } from 'lucide-react';
+
 export default function Customers() {
+  const { data, total, loading, page, setPage, search, setSearch, createItem, updateItem, deleteItem } = useCrud('/customers');
+  
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+  const [selectedItem, setSelectedItem] = useState(null);
+  const [formData, setFormData] = useState({ name: '', email: '', phone: '' });
+  const [actionLoading, setActionLoading] = useState(false);
+  const [error, setError] = useState('');
+
+  const openCreate = () => {
+    setFormData({ name: '', email: '', phone: '' });
+    setSelectedItem(null);
+    setError('');
+    setIsModalOpen(true);
+  };
+
+  const openEdit = (item) => {
+    setFormData({ name: item.name, email: item.email || '', phone: item.phone || '' });
+    setSelectedItem(item);
+    setError('');
+    setIsModalOpen(true);
+  };
+
+  const openDelete = (item) => {
+    setSelectedItem(item);
+    setIsDeleteOpen(true);
+  };
+
+  const handleSubmit = async () => {
+    if (!formData.name) return setError('Name is required');
+    if (formData.phone && formData.phone.length !== 10) return setError('Phone must be 10 digits');
+    setActionLoading(true);
+    try {
+      if (selectedItem) await updateItem(selectedItem.id, formData);
+      else await createItem(formData);
+      setIsModalOpen(false);
+    } catch (err) {
+      setError(err.response?.data?.message || 'Action failed');
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    setActionLoading(true);
+    try {
+      await deleteItem(selectedItem.id);
+      setIsDeleteOpen(false);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const columns = [
+    { key: 'name', label: 'Name' },
+    { key: 'phone', label: 'Phone', render: (val) => val || '-' },
+    { key: 'email', label: 'Email', render: (val) => val || '-' },
+  ];
+
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-12 text-center mt-2">
-      <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-primary-50 text-primary-600 mb-6">
-        <svg className="w-10 h-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
-        </svg>
+    <div className="space-y-6">
+      <div className="flex flex-col sm:flex-row justify-between gap-4">
+        <SearchBar value={search} onChange={setSearch} placeholder="Search customers..." />
+        <Button onClick={openCreate} className="flex items-center gap-2">
+          <Plus size={18} /> Add Customer
+        </Button>
       </div>
-      <h2 className="text-3xl font-bold text-gray-900 mb-3">Customers</h2>
-      <p className="text-gray-500 max-w-md mx-auto text-lg">This feature is currently under construction. Please check back later.</p>
+
+      <DataTable columns={columns} data={data} loading={loading} onEdit={openEdit} onDelete={openDelete} />
+      <Pagination page={page} setPage={setPage} total={total} />
+
+      <FormModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title={selectedItem ? 'Edit Customer' : 'New Customer'} onSubmit={handleSubmit} loading={actionLoading} error={error}>
+        <Input label="Name *" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} required />
+        <Input label="Phone (10 digits)" type="tel" value={formData.phone} onChange={e => setFormData({...formData, phone: e.target.value})} />
+        <Input label="Email" type="email" value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} />
+      </FormModal>
+
+      <DeleteConfirmDialog isOpen={isDeleteOpen} onClose={() => setIsDeleteOpen(false)} onConfirm={handleDelete} title="Delete Customer" message={`Are you sure you want to delete "${selectedItem?.name}"?`} loading={actionLoading} />
     </div>
   );
 }
