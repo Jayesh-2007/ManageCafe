@@ -2,7 +2,34 @@ import { createContext, useCallback, useContext, useMemo, useState } from 'react
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
 import { setAuthToken } from '../utils/api';
 
-let inMemoryJwt = null;
+const tokenStoreKey = 'managecafe.jwt';
+
+function readStoredJwt() {
+  try {
+    return window.sessionStorage.getItem(tokenStoreKey);
+  } catch {
+    return null;
+  }
+}
+
+function storeJwt(token) {
+  try {
+    window.sessionStorage.setItem(tokenStoreKey, token);
+  } catch {
+    // In-memory auth still works when browser storage is unavailable.
+  }
+}
+
+function removeStoredJwt() {
+  try {
+    window.sessionStorage.removeItem(tokenStoreKey);
+  } catch {
+    // In-memory auth still works when browser storage is unavailable.
+  }
+}
+
+let inMemoryJwt = readStoredJwt();
+setAuthToken(inMemoryJwt);
 
 const AuthContext = createContext(null);
 
@@ -44,12 +71,18 @@ export function AuthProvider({ children }) {
 
   const setJwt = useCallback((token) => {
     inMemoryJwt = token || null;
+    if (inMemoryJwt) {
+      storeJwt(inMemoryJwt);
+    } else {
+      removeStoredJwt();
+    }
     setAuthToken(inMemoryJwt);
     setAuthState(createAuthState(inMemoryJwt));
   }, []);
 
   const clearJwt = useCallback(() => {
     inMemoryJwt = null;
+    removeStoredJwt();
     setAuthToken(null);
     setAuthState(createAuthState(null));
   }, []);

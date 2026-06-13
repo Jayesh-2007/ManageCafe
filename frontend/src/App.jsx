@@ -1,13 +1,15 @@
 import { Route, Routes } from 'react-router-dom';
 import { ProtectedRoute } from './hooks/useAuth';
+import Login from './pages/Login';
+import SignUp from './pages/SignUp';
 
 const adminRoles = ['admin'];
 
 function App() {
   return (
     <Routes>
-      <Route path="/login" element={null} />
-      <Route path="/signup" element={null} />
+      <Route path="/login" element={<Login />} />
+      <Route path="/signup" element={<SignUp />} />
       <Route path="/pos" element={<ProtectedRoute />} />
       <Route path="/orders" element={<ProtectedRoute />} />
       <Route path="/products" element={<ProtectedRoute allowedRoles={adminRoles} />} />
