@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import ErrorMessage from '../components/common/ErrorMessage';
 import LoadingSpinner from '../components/common/LoadingSpinner';
 import Toast from '../components/common/Toast';
-import { useAuth } from '../hooks/useAuth';
+import { useAuth } from '../hooks/useAuth.jsx';
 import api from '../utils/api';
 
 const nameError = 'Please enter your full name';

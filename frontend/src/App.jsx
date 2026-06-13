@@ -1,5 +1,5 @@
 import { Route, Routes } from 'react-router-dom';
-import { ProtectedRoute } from './hooks/useAuth';
+import { ProtectedRoute } from './hooks/useAuth.jsx';
 import POSPage from './features/pos/pages/POSPage';
 import Login from './pages/Login';
 import SignUp from './pages/SignUp';
