@@ -123,3 +123,48 @@ Protected test routes:
 GET /api/auth/me
 GET /api/auth/admin-only
 ```
+
+## Categories
+
+All category routes require a JWT. Create, update, and delete require an admin token.
+
+```http
+GET    /api/categories
+GET    /api/categories/:id
+POST   /api/categories
+PUT    /api/categories/:id
+DELETE /api/categories/:id
+```
+
+Create or update body:
+
+```json
+{
+  "name": "Beverages",
+  "color": "#2563EB"
+}
+```
+
+## Products
+
+All product routes require a JWT. Create, update, and archive require an admin token.
+
+```http
+GET    /api/products?page=1&limit=20&search=tea&category_id=1
+GET    /api/products/:id
+POST   /api/products
+PUT    /api/products/:id
+DELETE /api/products/:id
+```
+
+Create or update body:
+
+```json
+{
+  "name": "Masala Tea",
+  "category_id": 1,
+  "price": 20,
+  "tax_rate": "5",
+  "description": "Hot tea"
+}
+```
