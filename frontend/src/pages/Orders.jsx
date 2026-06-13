@@ -1,13 +1,112 @@
+import { useState } from 'react';
+import useOrders from '../hooks/useOrders';
+import { orderService } from '../services/orderService';
+import OrdersTable from '../components/orders/OrdersTable';
+import OrderSearch from '../components/orders/OrderSearch';
+import OrderFilters from '../components/orders/OrderFilters';
+import OrderDetailsModal from '../components/orders/OrderDetailsModal';
+import EditOrderModal from '../components/orders/EditOrderModal';
+import DeleteOrderDialog from '../components/orders/DeleteOrderDialog';
+import OrderStatusBadge from '../components/orders/OrderStatusBadge';
+
 export default function Orders() {
+  const { 
+    orders, loading, search, setSearch, 
+    status, setStatus, kdsStatus, setKdsStatus, 
+    dateFilter, setDateFilter, refetch 
+  } = useOrders();
+
+  const [selectedOrder, setSelectedOrder] = useState(null);
+  const [modalType, setModalType] = useState(null); // 'view', 'edit', 'delete'
+
+  const handleAction = (order, type) => {
+    setSelectedOrder(order);
+    setModalType(type);
+  };
+
+  const closeModal = () => {
+    setSelectedOrder(null);
+    setModalType(null);
+  };
+
+  const handleDeleteConfirm = async (id) => {
+    try {
+      await orderService.deleteOrder(id);
+      closeModal();
+      refetch();
+    } catch (err) {
+      alert(err.response?.data?.message || 'Failed to delete order');
+    }
+  };
+
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-12 text-center mt-2">
-      <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-primary-50 text-primary-600 mb-6">
-        <svg className="w-10 h-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
-        </svg>
+    <div className="flex flex-col gap-6">
+      {/* Header & Filters */}
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white p-4 rounded-lg border shadow-sm">
+        <OrderSearch search={search} onSearchChange={setSearch} />
+        <OrderFilters 
+          status={status} setStatus={setStatus}
+          kdsStatus={kdsStatus} setKdsStatus={setKdsStatus}
+          dateFilter={dateFilter} setDateFilter={setDateFilter}
+        />
       </div>
-      <h2 className="text-3xl font-bold text-gray-900 mb-3">Orders</h2>
-      <p className="text-gray-500 max-w-md mx-auto text-lg">This feature is currently under construction. Please check back later.</p>
+
+      {/* Main Table */}
+      <OrdersTable 
+        orders={orders} 
+        loading={loading} 
+        onView={(order) => handleAction(order, 'view')}
+        onEdit={(order) => handleAction(order, 'edit')}
+        onDelete={(order) => handleAction(order, 'delete')}
+      />
+
+      {/* Mobile Card View */}
+      <div className="md:hidden space-y-4">
+        {loading ? (
+          <div className="p-4 text-center">Loading...</div>
+        ) : orders.map(order => (
+          <div key={order.id} className="bg-white p-4 rounded-lg border shadow-sm flex flex-col gap-3">
+            <div className="flex justify-between items-start">
+              <span className="font-bold text-gray-900">#{order.id}</span>
+              <span className="font-bold text-gray-900">${(order.total || 0).toFixed(2)}</span>
+            </div>
+            <div className="text-sm text-gray-500">{order.customer?.name || 'Walk-in'}</div>
+            <div className="flex gap-2">
+              <OrderStatusBadge status={order.status} type="order" />
+              <OrderStatusBadge status={order.kds_status} type="kds" />
+            </div>
+            <div className="flex justify-end gap-3 pt-2 border-t">
+              <button onClick={() => handleAction(order, 'view')} className="text-sm text-primary-600 font-medium">View</button>
+              {order.status !== 'paid' && (
+                <>
+                  <button onClick={() => handleAction(order, 'edit')} className="text-sm text-blue-600 font-medium">Edit</button>
+                  <button onClick={() => handleAction(order, 'delete')} className="text-sm text-red-600 font-medium">Delete</button>
+                </>
+              )}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Modals */}
+      <OrderDetailsModal 
+        isOpen={modalType === 'view'} 
+        onClose={closeModal} 
+        orderId={selectedOrder?.id} 
+      />
+      
+      <EditOrderModal 
+        isOpen={modalType === 'edit'} 
+        onClose={closeModal} 
+        order={selectedOrder} 
+      />
+      
+      <DeleteOrderDialog 
+        isOpen={modalType === 'delete'} 
+        onClose={closeModal} 
+        onConfirm={handleDeleteConfirm}
+        order={selectedOrder} 
+      />
     </div>
   );
 }
